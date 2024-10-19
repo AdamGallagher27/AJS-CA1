@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-const { 
-    readAll, 
-    readOne,
-    createData,
-    updateData,
-    deleteData
+const {
+	readAll,
+	readOne,
+	createData,
+	updateData,
+	deleteData
 } = require('../controllers/user.controller');
 
 router.get('/', readAll);

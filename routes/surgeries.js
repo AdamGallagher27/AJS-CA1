@@ -7,7 +7,7 @@ const {
 	createData,
 	updateData,
 	deleteData
-} = require('../controllers/hospital.controller');
+} = require('../controllers/surgery.controller');
 
 router.get('/', readAll);
 router.get('/:id', readOne);
