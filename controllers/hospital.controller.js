@@ -4,7 +4,6 @@ const Room = require('../models/room.model')
 const readAll = (req, res) => {
   Hospital.find().populate('rooms')
     .then(data => {
-      console.log(data)
 
       if (data.length > 0) {
         return res.status(200).json(data)
@@ -69,8 +68,8 @@ const createData = (req, res) => {
 }
 
 const updateData = (req, res) => {
-  let id = req.params.id
-  let body = req.body
+  const id = req.params.id
+  const body = req.body
 
   Hospital.findByIdAndUpdate(id, body, {
     new: true,
@@ -102,7 +101,7 @@ const updateData = (req, res) => {
 }
 
 const deleteData = (req, res) => {
-  let id = req.params.id
+  const id = req.params.id
   Hospital.findByIdAndDelete(id)
     .then(async data => {
       if (!data) {

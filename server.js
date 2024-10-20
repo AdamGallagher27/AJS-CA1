@@ -13,7 +13,7 @@ app.use('/api/users', require('./routes/users'))
 app.use('/api/hospitals', require('./routes/hospitals'))
 app.use('/api/rooms', require('./routes/rooms'))
 app.use('/api/surgeries', require('./routes/surgeries'))
-
+app.use('/api/patients', require('./routes/patients'))
 
 app.listen(port, () => {
 	console.log(`Example app listening on port ${port}`);

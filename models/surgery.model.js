@@ -18,15 +18,11 @@ const surgerySchema = new Schema({
     ref: 'Room',
     required: [true, 'Room id field is required']
   },
-
-  // 6714062a736bee973a14be4d
-
-  // will add you later
-  //   patients: [{
-  //     type: Schema.Types.ObjectId,
-  //     ref: 'Patient',
-  //     required: true
-  // }]
+  patient_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Patient',
+      required: true
+  }
 }, { timestamps: true });
 
 module.exports = model('Surgery', surgerySchema);

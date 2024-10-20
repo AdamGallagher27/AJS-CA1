@@ -1,15 +1,16 @@
+const Patient = require('../models/patient.model')
 const Surgery = require('../models/surgery.model')
-const Room = require('../models/room.model')
 
-const addNewSurgeryToRoom = async (model, room_id, surgery_id) => {
-  await model.findByIdAndUpdate(room_id, { $push: { surgeries: surgery_id } })
+
+const addNewPatientToSurgery = async (model, surgery_id, patient_id) => {
+  await model.findByIdAndUpdate(surgery_id, { $push: { patients: patient_id } })
 }
 
-const deleteSurgeryFromRoom = async (model, room_id, surgery_id) => {
+const deletePatientFromSurgery = async (model, surgery_id, patient_id) => {
   try {
     await model.findByIdAndUpdate(
-      room_id,
-      { $pull: { surgerys: surgery_id } },
+      surgery_id,
+      { $pull: { patients: patient_id } },
     )
   }
   catch (error) {
@@ -19,7 +20,7 @@ const deleteSurgeryFromRoom = async (model, room_id, surgery_id) => {
 }
 
 const readAll = (req, res) => {
-  Surgery.find()
+  Patient.find().populate('surgeries')
     .then(data => {
 
       if (data.length > 0) {
@@ -32,22 +33,21 @@ const readAll = (req, res) => {
     .catch(err => {
       return res.status(500).json(err)
     })
-
 }
 
 const readOne = (req, res) => {
   const id = req.params.id
 
-  Surgery.findById(id)
+  Patient.findById(id).populate('surgeries')
     .then(data => {
       if (!data) {
         return res.status(404).json({
-          message: `Surgery with id: ${id} not found`
+          message: `Patient with id: ${id} not found`
         })
       }
 
       return res.status(200).json({
-        message: `Surgery with id: ${id} retrieved`,
+        message: `Patient with id: ${id} retrieved`,
         data
       })
     })
@@ -56,7 +56,7 @@ const readOne = (req, res) => {
 
       if (err.name === 'CastError') {
         return res.status(404).json({
-          message: `Surgery with id: ${id} not found`
+          message: `Patient with id: ${id} not found`
         })
       }
 
@@ -65,17 +65,16 @@ const readOne = (req, res) => {
 }
 
 const createData = (req, res) => {
-  console.log('check me ' + JSON.stringify(req.body))
   const body = req.body
 
-  Surgery.create(body)
+  Patient.create(body)
     .then(async data => {
-      console.log(`New surgery created`, data)
+      console.log(`New patient created`, data)
 
-      addNewSurgeryToRoom(Room, body.room_id, data._id)
+      addNewPatientToSurgery(Surgery, body.surgery_id, data._id)
 
       return res.status(201).json({
-        message: "Surgery created",
+        message: "Patient created",
         data
       })
     })
@@ -94,12 +93,11 @@ const updateData = (req, res) => {
   const id = req.params.id
   const body = req.body
 
-  Surgery.findByIdAndUpdate(id, body, {
+  Patient.findByIdAndUpdate(id, body, {
     new: true,
     runValidators: true
   })
     .then(async data => {
-      updateRoomSurgerys(body.room_id, data._id)
       return res.status(201).json(data)
     })
     .catch(err => {
@@ -107,7 +105,7 @@ const updateData = (req, res) => {
       if (err.name === 'CastError') {
         if (err.kind === 'ObjectId') {
           return res.status(404).json({
-            message: `Surgery with id: ${id} not found`
+            message: `Patient with id: ${id} not found`
           })
         }
         else {
@@ -125,25 +123,25 @@ const updateData = (req, res) => {
 const deleteData = (req, res) => {
   const id = req.params.id
 
-  Surgery.findByIdAndDelete(id)
+  Patient.findByIdAndDelete(id)
     .then(async data => {
       if (!data) {
         return res.status(404).json({
-          message: `Surgery with id: ${id} not found`
+          message: `Patient with id: ${id} not found`
         })
       }
 
-      deleteSurgeryFromRoom(Room, data.room_id, data._id)
+      deletePatientFromSurgery(Surgery, data.surgery_id, data._id)
 
       return res.status(200).json({
-        message: `Surgery with id: ${id}`
+        message: `Patient with id: ${id}`
       })
     })
     .catch(err => {
 
       if (err.name === 'CastError') {
         return res.status(404).json({
-          message: `Surgery with id: ${id} not found`
+          message: `Patient with id: ${id} not found`
         })
       }
 

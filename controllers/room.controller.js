@@ -3,26 +3,25 @@ const Hospital = require('../models/hospital.model')
 
 
 const addNewRoomToHospital = async (model, hospital_id, room_id) => {
-  await model.findByIdAndUpdate(hospital_id, {$push: {rooms: room_id}})
+  await model.findByIdAndUpdate(hospital_id, { $push: { rooms: room_id } })
 }
 
 const deleteRoomFromHospital = async (model, hospital_id, room_id) => {
-  try{
+  try {
     await model.findByIdAndUpdate(
-      hospital_id, 
-      {$pull: {rooms: room_id}},
+      hospital_id,
+      { $pull: { rooms: room_id } },
     )
   }
   catch (error) {
     console.error(error)
   }
-  
+
 }
 
 const readAll = (req, res) => {
-  Room.find()
+  Room.find().populate('surgeries')
     .then(data => {
-      console.log(data)
 
       if (data.length > 0) {
         return res.status(200).json(data)
@@ -32,16 +31,14 @@ const readAll = (req, res) => {
       }
     })
     .catch(err => {
-      console.log(err)
       return res.status(500).json(err)
     })
-
 }
 
 const readOne = (req, res) => {
-  let id = req.params.id
+  const id = req.params.id
 
-  Room.findById(id)
+  Room.findById(id).populate('surgeries')
     .then(data => {
       if (!data) {
         return res.status(404).json({
@@ -69,10 +66,10 @@ const readOne = (req, res) => {
 
 const createData = (req, res) => {
   console.log('check me ' + JSON.stringify(req.body))
-  let body = req.body
+  const body = req.body
 
   Room.create(body)
-    .then( async data => {
+    .then(async data => {
       console.log(`New room created`, data)
 
       addNewRoomToHospital(Hospital, body.hospital_id, data._id)
@@ -94,19 +91,17 @@ const createData = (req, res) => {
 }
 
 const updateData = (req, res) => {
-  let id = req.params.id
-  let body = req.body
+  const id = req.params.id
+  const body = req.body
 
   Room.findByIdAndUpdate(id, body, {
     new: true,
     runValidators: true
   })
     .then(async data => {
-      updateHospitalRooms(body.hospital_id, data._id)
       return res.status(201).json(data)
     })
     .catch(err => {
-
       if (err.name === 'CastError') {
         if (err.kind === 'ObjectId') {
           return res.status(404).json({
@@ -120,13 +115,12 @@ const updateData = (req, res) => {
         }
 
       }
-
       return res.status(500).json(err)
     })
 }
 
 const deleteData = (req, res) => {
-  let id = req.params.id
+  const id = req.params.id
 
   Room.findByIdAndDelete(id)
     .then(async data => {

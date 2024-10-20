@@ -22,6 +22,11 @@ const roomSchema = new Schema({
 		ref: 'Hospital',
 		required: [true, 'hospital_id field is required']
 	},
+	surgeries: [{
+		type: Schema.Types.ObjectId,
+		ref: 'Surgery',
+		required: true
+	}]
 }, { timestamps: true });
 
 module.exports = model('Room', roomSchema);
