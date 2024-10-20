@@ -22,7 +22,12 @@ const surgerySchema = new Schema({
       type: Schema.Types.ObjectId,
       ref: 'Patient',
       required: true
-  }
+  },
+  workers: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Worker',
+    required: [true, 'Worker field is required']
+  }],
 }, { timestamps: true });
 
 module.exports = model('Surgery', surgerySchema);
