@@ -1,5 +1,6 @@
-const express = require('express');
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
+const { checkUserPermission, userLoggedIn } = require('../middleware/auth')
 
 const {
 	readAll,
@@ -7,12 +8,12 @@ const {
 	createData,
 	updateData,
 	deleteData
-} = require('../controllers/hospital.controller');
+} = require('../controllers/hospital.controller')
 
-router.get('/', readAll);
-router.get('/:id', readOne);
-router.post('/', createData);
-router.put('/:id', updateData);
-router.delete('/:id', deleteData);
+router.get('/', userLoggedIn, checkUserPermission('hospitals', 'read'), readAll)
+router.get('/:id', userLoggedIn, checkUserPermission('hospitals', 'read'), readOne)
+router.post('/', userLoggedIn, checkUserPermission('hospitals', 'create'), createData)
+router.put('/:id', userLoggedIn, checkUserPermission('hospitals', 'update'), updateData)
+router.delete('/:id', userLoggedIn, checkUserPermission('hospitals', 'delete'), deleteData)
 
-module.exports = router;
+module.exports = router

@@ -1,61 +1,60 @@
-const readAll = (req, res) => {
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcryptjs')
+const User = require('../models/user.model')
 
-  res.status(200).json({
-    "message": "All Users retrieved"
-  });
-};
+const register = (req, res) => {
+  console.log(req.body)
+  const newUser = new User(req.body)
+  newUser.password = bcrypt.hashSync(req.body.password, 10)
+  newUser.save()
+    .then(data => {
+      data.password = undefined
+      return res.status(201).json(data)
+    })
+    .catch(err => {
+      return res.status(400).json({
+        message: err
+      })
+    })
+}
+const login = (req, res) => {
+  User.findOne({ email: req.body.email })
+    .then(user => {
+      if (!user || !user.comparePassword(req.body.password)) {
+        return res.status(401).json({
+          message: "authentication failed. Invalid User"
+        })
+      }
 
-const readOne = (req, res) => {
-  let id = req.params.id;
+      return res.status(200).json({
+        message: "Logged in succesfully",
+        token: jwt.sign({
+          email: user.email,
+          full_name: user.full_name,
+          _id: user._id,
+          role:  user.role
+        }, process.env.JWT_SECRET)
+      })
 
-  res.status(200).json({
-    "message": `User with id: ${id} retrieved`
-  });
-};
+    })
+    .catch(err => {
+      return res.status(500).json(err)
+    })
 
-const createData = (req, res) => {
-  console.log(req.body);
-  let data = req.body;
-
-  if (data.password.length < 6) {
-    return res.status(422).json({
-      "message": "User password must be over 6 characters",
-    });
+}
+const loginRequired = (req, res, next) => {
+  if (req.user) {
+    next()
   }
-
-  data.password = undefined;
-
-  return res.status(201).json({
-    "message": "All good",
-    data
-  });
-};
-
-const updateData = (req, res) => {
-  let id = req.params.id;
-  let data = req.body;
-
-  data.id = id;
-
-  res.status(200).json({
-    "message": `You updated user with id: ${id}`,
-    data
-  });
-
-};
-
-const deleteData = (req, res) => {
-  let id = req.params.id;
-
-  res.status(200).json({
-    "message": `You deleted user with id: ${id}`
-  });
-};
+  else {
+    return res.status(401).json({
+      message: "Unauthorised User!"
+    })
+  }
+}
 
 module.exports = {
-  readAll,
-  readOne,
-  createData,
-  updateData,
-  deleteData
-};
+  register,
+  login,
+  loginRequired
+}
