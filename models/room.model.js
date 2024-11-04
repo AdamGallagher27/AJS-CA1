@@ -2,7 +2,7 @@ const { Schema, model } = require('mongoose');
 
 const roomSchema = new Schema({
 	room_number: {
-		type: String,
+		type: Number,
 		required: [true, 'Title field is required']
 	},
 	room_type: {
@@ -17,10 +17,10 @@ const roomSchema = new Schema({
 		type: Number,
 		required: [true, 'Number of departments field is required']
 	},
-	hospital_id: {
+	hospital: {
 		type: Schema.Types.ObjectId,
 		ref: 'Hospital',
-		required: [true, 'hospital_id field is required']
+		required: [true, 'hospital field is required']
 	},
 	surgeries: [{
 		type: Schema.Types.ObjectId,

@@ -19,7 +19,7 @@ const deleteSurgeryFromRoom = async (model, room_id, surgery_id) => {
 }
 
 const readAll = (req, res) => {
-  Surgery.find()
+  Surgery.find().populate('patient room')
     .then(data => {
 
       if (data.length > 0) {
@@ -38,7 +38,7 @@ const readAll = (req, res) => {
 const readOne = (req, res) => {
   const id = req.params.id
 
-  Surgery.findById(id)
+  Surgery.findById(id).populate('patient room')
     .then(data => {
       if (!data) {
         return res.status(404).json({
@@ -72,7 +72,7 @@ const createData = (req, res) => {
     .then(async data => {
       console.log(`New surgery created`, data)
 
-      addNewSurgeryToRoom(Room, body.room_id, data._id)
+      addNewSurgeryToRoom(Room, body.room._id, data._id)
 
       return res.status(201).json({
         message: "Surgery created",
@@ -99,7 +99,7 @@ const updateData = (req, res) => {
     runValidators: true
   })
     .then(async data => {
-      updateRoomSurgerys(body.room_id, data._id)
+      updateRoomSurgerys(body.room._id, data._id)
       return res.status(201).json(data)
     })
     .catch(err => {
@@ -133,7 +133,7 @@ const deleteData = (req, res) => {
         })
       }
 
-      deleteSurgeryFromRoom(Room, data.room_id, data._id)
+      deleteSurgeryFromRoom(Room, data.room._id, data._id)
 
       return res.status(200).json({
         message: `Surgery with id: ${id}`

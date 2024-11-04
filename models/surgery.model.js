@@ -13,12 +13,12 @@ const surgerySchema = new Schema({
     type: Number,
     required: [true, 'Duration field is required']
   },
-  room_id: {
+  room: {
     type: Schema.Types.ObjectId,
     ref: 'Room',
     required: [true, 'Room id field is required']
   },
-  patient_id: {
+  patient: {
       type: Schema.Types.ObjectId,
       ref: 'Patient',
       required: true
