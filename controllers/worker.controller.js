@@ -52,8 +52,6 @@ const readOne = (req, res) => {
       })
     })
     .catch(err => {
-      console.log(err)
-
       if (err.name === 'CastError') {
         return res.status(404).json({
           message: `Worker with id: ${id} not found`
@@ -69,8 +67,6 @@ const createData = (req, res) => {
 
   Worker.create(body)
     .then(async data => {
-      console.log(`New worker created`, data)
-
       addNewWorkerToSurgery(Surgery, body.surgery_id, data._id)
 
       return res.status(201).json({
@@ -79,8 +75,6 @@ const createData = (req, res) => {
       })
     })
     .catch(err => {
-      console.log(err)
-
       if (err.name === 'ValidationError') {
         return res.status(422).json(err)
       }

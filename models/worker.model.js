@@ -20,14 +20,9 @@ const workerSchema = new Schema({
   },
   surgeries: [{
     type: Schema.Types.ObjectId,
-    ref: 'Room',
+    ref: 'Surgery',
     required: [false, 'Surgeries field is required']
   }],
-  // patient_id: {
-  //     type: Schema.Types.ObjectId,
-  //     ref: 'Patient',
-  //     required: true
-  // }
 }, { timestamps: true });
 
 module.exports = model('Worker', workerSchema);

@@ -52,8 +52,6 @@ const readOne = (req, res) => {
       })
     })
     .catch(err => {
-      console.log(err)
-
       if (err.name === 'CastError') {
         return res.status(404).json({
           message: `Surgery with id: ${id} not found`
@@ -65,13 +63,10 @@ const readOne = (req, res) => {
 }
 
 const createData = (req, res) => {
-  console.log('check me ' + JSON.stringify(req.body))
   const body = req.body
 
   Surgery.create(body)
     .then(async data => {
-      console.log(`New surgery created`, data)
-
       addNewSurgeryToRoom(Room, body.room._id, data._id)
 
       return res.status(201).json({
@@ -80,8 +75,6 @@ const createData = (req, res) => {
       })
     })
     .catch(err => {
-      console.log(err)
-
       if (err.name === 'ValidationError') {
         return res.status(422).json(err)
       }
