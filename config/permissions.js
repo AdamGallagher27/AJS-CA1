@@ -23,6 +23,12 @@ const permissions = {
     update: ['admin'],
     delete: ['admin']
   },
+  workers: {
+    read: ['user', 'admin'],
+    create: ['admin'],
+    update: ['admin'],
+    delete: ['admin']
+  },
 }
 
 module.exports = permissions

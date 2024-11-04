@@ -2,21 +2,16 @@ const Worker = require('../models/worker.model')
 const Surgery = require('../models/surgery.model')
 
 
-const addNewWorkerToSurgery = async (model, surgery_id, worker_id) => {
-  await model.findByIdAndUpdate(surgery_id, { $push: { workers: worker_id } })
-}
-
-const deleteWorkerFromSurgery = async (model, surgery_id, worker_id) => {
+const addSurgerytoWorkers = async (worker_id, surgery_ids) => {
   try {
-    await model.findByIdAndUpdate(
-      surgery_id,
-      { $pull: { workers: worker_id } },
+    await Surgery.updateMany(
+      { _id: { $in: surgery_ids } },
+      { $addToSet: { workers: worker_id } }
     )
   }
   catch (error) {
     console.error(error)
   }
-
 }
 
 const readAll = (req, res) => {
@@ -64,15 +59,20 @@ const readOne = (req, res) => {
 
 const createData = (req, res) => {
   const body = req.body
+  let workerId = ''
 
   Worker.create(body)
-    .then(async data => {
-      addNewWorkerToSurgery(Surgery, body.surgery_id, data._id)
-
+    .then(data => {
+      workerId = data._id
       return res.status(201).json({
         message: "Worker created",
         data
       })
+    })
+    .then(() => {
+      if(body.surgeries) {
+        addSurgerytoWorkers(workerId, body.surgeries)
+      }
     })
     .catch(err => {
       if (err.name === 'ValidationError') {
@@ -123,7 +123,7 @@ const deleteData = (req, res) => {
         })
       }
 
-      deleteWorkerFromSurgery(Surgery, data.surgery_id, data._id)
+      // deleteWorkerFromSurgery(Surgery, data.surgery_id, data._id)
 
       return res.status(200).json({
         message: `Worker with id: ${id}`

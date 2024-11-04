@@ -1,8 +1,14 @@
 const Surgery = require('../models/surgery.model')
 const Room = require('../models/room.model')
+const Worker = require('../models/worker.model')
 
 const addNewSurgeryToRoom = async (model, room_id, surgery_id) => {
-  await model.findByIdAndUpdate(room_id, { $push: { surgeries: surgery_id } })
+  try {
+    await model.findByIdAndUpdate(room_id, { $push: { surgeries: surgery_id } })
+  }
+  catch (error) {
+    console.error(error)
+  }
 }
 
 const deleteSurgeryFromRoom = async (model, room_id, surgery_id) => {
@@ -15,11 +21,22 @@ const deleteSurgeryFromRoom = async (model, room_id, surgery_id) => {
   catch (error) {
     console.error(error)
   }
+}
 
+const addWorkerstoSurgery = async (surgery_id, worker_ids) => {
+  try {
+    await Worker.updateMany(
+      { _id: { $in: worker_ids } },
+      { $addToSet: { surgeries: surgery_id } }
+    )
+  }
+  catch (error) {
+    console.error(error)
+  }
 }
 
 const readAll = (req, res) => {
-  Surgery.find().populate('patient room')
+  Surgery.find().populate('patient room workers')
     .then(data => {
 
       if (data.length > 0) {
@@ -38,7 +55,7 @@ const readAll = (req, res) => {
 const readOne = (req, res) => {
   const id = req.params.id
 
-  Surgery.findById(id).populate('patient room')
+  Surgery.findById(id).populate('patient room workers')
     .then(data => {
       if (!data) {
         return res.status(404).json({
@@ -64,15 +81,22 @@ const readOne = (req, res) => {
 
 const createData = (req, res) => {
   const body = req.body
+  let surgeryId = ''
 
   Surgery.create(body)
-    .then(async data => {
-      addNewSurgeryToRoom(Room, body.room._id, data._id)
+    .then(data => {
+      surgeryId = data._id
+      addNewSurgeryToRoom(Room, body.room._id, surgeryId)
 
       return res.status(201).json({
         message: "Surgery created",
         data
       })
+    })
+    .then(() => {
+      if (body.workers) {
+        addWorkerstoSurgery(surgeryId, body.workers)
+      }
     })
     .catch(err => {
       if (err.name === 'ValidationError') {

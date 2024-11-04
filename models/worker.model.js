@@ -1,9 +1,9 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require('mongoose')
 
 const workerSchema = new Schema({
   worker_role: {
     type: String,
-    enum:[
+    enum: [
       'doctor',
       'nurse',
       'surgeon'
@@ -21,8 +21,8 @@ const workerSchema = new Schema({
   surgeries: [{
     type: Schema.Types.ObjectId,
     ref: 'Surgery',
-    required: [false, 'Surgeries field is required']
+    required: false
   }],
-}, { timestamps: true });
+}, { timestamps: true })
 
-module.exports = model('Worker', workerSchema);
+module.exports = model('Worker', workerSchema)
