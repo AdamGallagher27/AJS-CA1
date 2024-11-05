@@ -88,15 +88,14 @@ const createData = (req, res) => {
       surgeryId = data._id
       addNewSurgeryToRoom(Room, body.room._id, surgeryId)
 
+      if (body.workers) {
+        addWorkerstoSurgery(surgeryId, body.workers)
+      }
+
       return res.status(201).json({
         message: "Surgery created",
         data
       })
-    })
-    .then(() => {
-      if (body.workers) {
-        addWorkerstoSurgery(surgeryId, body.workers)
-      }
     })
     .catch(err => {
       if (err.name === 'ValidationError') {
@@ -115,8 +114,12 @@ const updateData = (req, res) => {
     new: true,
     runValidators: true
   })
-    .then(async data => {
-      updateRoomSurgerys(body.room._id, data._id)
+    .then(data => {
+
+      if (body.workers) {
+        addWorkerstoSurgery(data._id, body.workers)
+      }
+
       return res.status(201).json(data)
     })
     .catch(err => {

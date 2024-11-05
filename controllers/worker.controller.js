@@ -64,15 +64,15 @@ const createData = (req, res) => {
   Worker.create(body)
     .then(data => {
       workerId = data._id
+
+      if(body.surgeries) {
+        addSurgerytoWorkers(workerId, body.surgeries)
+      }
+
       return res.status(201).json({
         message: "Worker created",
         data
       })
-    })
-    .then(() => {
-      if(body.surgeries) {
-        addSurgerytoWorkers(workerId, body.surgeries)
-      }
     })
     .catch(err => {
       if (err.name === 'ValidationError') {
@@ -91,7 +91,12 @@ const updateData = (req, res) => {
     new: true,
     runValidators: true
   })
-    .then(async data => {
+    .then(data => {
+
+      if(body.surgeries) {
+        addSurgerytoWorkers(id, body.surgeries)
+      }
+
       return res.status(201).json(data)
     })
     .catch(err => {
