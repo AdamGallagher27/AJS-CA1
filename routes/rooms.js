@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { checkUserPermission, userLoggedIn } = require('../middleware/auth')
+const { checkUserPermission } = require('../middleware/auth')
 
 const {
 	readAll,
@@ -10,10 +10,10 @@ const {
 	deleteData
 } = require('../controllers/room.controller')
 
-router.get('/', userLoggedIn, checkUserPermission('rooms', 'read'), readAll)
-router.get('/:id', userLoggedIn, checkUserPermission('rooms', 'read'), readOne)
-router.post('/', userLoggedIn, checkUserPermission('rooms', 'create'), createData)
-router.put('/:id', userLoggedIn, checkUserPermission('rooms', 'update'), updateData)
-router.delete('/:id', userLoggedIn, checkUserPermission('rooms', 'delete'), deleteData)
+router.get('/', checkUserPermission('rooms', 'read'), readAll)
+router.get('/:id', checkUserPermission('rooms', 'read'), readOne)
+router.post('/', checkUserPermission('rooms', 'create'), createData)
+router.put('/:id', checkUserPermission('rooms', 'update'), updateData)
+router.delete('/:id', checkUserPermission('rooms', 'delete'), deleteData)
 
 module.exports = router

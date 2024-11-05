@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { checkUserPermission, userLoggedIn } = require('../middleware/auth')
+const { checkUserPermission } = require('../middleware/auth')
 
 const {
 	readAll,
@@ -10,10 +10,10 @@ const {
 	deleteData
 } = require('../controllers/surgery.controller')
 
-router.get('/', userLoggedIn, checkUserPermission('surgeries', 'read'), readAll)
-router.get('/:id', userLoggedIn, checkUserPermission('surgeries', 'read'), readOne)
-router.post('/', userLoggedIn, checkUserPermission('surgeries', 'create'), createData)
-router.put('/:id', userLoggedIn, checkUserPermission('surgeries', 'update'), updateData)
-router.delete('/:id', userLoggedIn, checkUserPermission('surgeries', 'delete'), deleteData)
+router.get('/', checkUserPermission('surgeries', 'read'), readAll)
+router.get('/:id', checkUserPermission('surgeries', 'read'), readOne)
+router.post('/', checkUserPermission('surgeries', 'create'), createData)
+router.put('/:id', checkUserPermission('surgeries', 'update'), updateData)
+router.delete('/:id', checkUserPermission('surgeries', 'delete'), deleteData)
 
 module.exports = router

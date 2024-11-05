@@ -1,16 +1,30 @@
 const mongoose = require('mongoose');
+let db;
 
-const init = () => {
-	mongoose.set('debug', true);
+const connect = async () => {
+	db = null;
 
-	mongoose.connect(process.env.DB_URL)
-		.catch(err => {
-			console.log(`Error: ${err.stack}`);
-		});
+	try {
+		mongoose.set('strictQuery', false);
 
-	mongoose.connection.on('open', () => {
-		console.log('Connected to Database');
-	});
+		const dbUrl = process.env.ENVIRONMENT === 'testing' ? process.env.TEST_DB_URL : process.env.DB_URL
+		await mongoose.connect(dbUrl);
+
+		console.log('Connected successfully to db');
+		db = mongoose.connection;
+	} catch (error) {
+		console.log(error);
+	}
+	finally {
+		if (db !== null && db.readyState === 1) {
+			// await db.close();
+			// console.log("Disconnected successfully from db");
+		}
+	}
 };
 
-module.exports = init;
+const disconnect = async () => {
+	await db.close();
+};
+
+module.exports = { connect, disconnect };
