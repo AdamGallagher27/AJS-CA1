@@ -26,6 +26,10 @@ const patientSchema = new Schema({
 		ref: 'Surgery',
 		required: [true, 'Surgeries field is required']
 	}],
+	created_by: {
+		type: String,
+		required: [true, 'created by field is required']
+	}
 }, { timestamps: true });
 
 module.exports = model('Patient', patientSchema);

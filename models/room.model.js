@@ -26,7 +26,11 @@ const roomSchema = new Schema({
 		type: Schema.Types.ObjectId,
 		ref: 'Surgery',
 		required: true
-	}]
+	}],
+	created_by: {
+		type: String,
+		required: [true, 'created by field is required']
+	}
 }, { timestamps: true });
 
 module.exports = model('Room', roomSchema);

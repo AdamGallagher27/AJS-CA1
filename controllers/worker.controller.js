@@ -57,8 +57,38 @@ const readOne = (req, res) => {
     })
 }
 
+const readOneByUserId = (req, res) => {
+  const userId = req.body.user._id
+
+  Surgery.find({created_by: userId}).populate('surgeries')
+  .then(data => {
+    if(!data || data.length === 0) {
+      return res.status(404).json({
+        message: `No Patients found for user with id: ${userId}`
+      })
+    }
+
+    return res.status(200).json({
+      message: `Patient created by user: ${userIs}`,
+      data
+    })
+  })
+  .catch(error => {
+    if(error.name === 'CastError') {
+      return res.status(404).json({
+        message: `Invalid user ID: ${userId}`,
+      })
+    }
+
+    return res.status(500).json(err)
+  })
+}
+
 const createData = (req, res) => {
-  const body = req.body
+  const body = {
+    ...req.body,
+    created_by: req.user._id
+  }
   let workerId = ''
 
   Worker.create(body)
@@ -149,6 +179,7 @@ const deleteData = (req, res) => {
 module.exports = {
   readAll,
   readOne,
+  readOneByUserId,
   createData,
   updateData,
   deleteData

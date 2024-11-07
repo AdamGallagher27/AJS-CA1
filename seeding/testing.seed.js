@@ -19,12 +19,22 @@ const seedDatabase = async () => {
     await Worker.deleteMany({})
     await User.deleteMany({})
 
+    const user = await User.create({
+      full_name: 'Admin User',
+      email: 'admin@test.com',
+      password: 'password',
+      role: 'admin'
+    })
+
+    const userID = user._id
+
     const hospital = await Hospital.create({
       title: 'Central City Hospital',
       city: 'Springfield',
       daily_rate: 1500,
       number_of_departments: 10,
       has_emergency_services: true,
+      created_by: userID
     })
 
     const rooms = await Room.create([
@@ -34,6 +44,7 @@ const seedDatabase = async () => {
         availability_status: true,
         daily_rate: 300,
         hospital: hospital._id,
+        created_by: userID
       },
       {
         room_number: 102,
@@ -41,6 +52,7 @@ const seedDatabase = async () => {
         availability_status: false,
         daily_rate: 200,
         hospital: hospital._id,
+        created_by: userID
       }
     ])
 
@@ -53,16 +65,19 @@ const seedDatabase = async () => {
         worker_role: "doctor",
         first_name: "Alice",
         last_name: "Johnson",
+        created_by: userID
       },
       {
         worker_role: "nurse",
         first_name: "Brian",
         last_name: "Smith",
+        created_by: userID
       },
       {
         worker_role: "surgeon",
         first_name: "Claire",
         last_name: "Lee",
+        created_by: userID
       },
     ])
 
@@ -72,6 +87,7 @@ const seedDatabase = async () => {
       insurance: true,
       age: 45,
       condition: "Appendicitis",
+      created_by: userID
     },
     {
       first_name: "John",
@@ -79,6 +95,7 @@ const seedDatabase = async () => {
       insurance: false,
       age: 21,
       condition: "Leg break",
+      created_by: userID
     }])
 
     const surgeries = await Surgery.create([{
@@ -86,14 +103,16 @@ const seedDatabase = async () => {
       date: new Date("2024-12-15T10:00:00Z"),
       duration: 2,
       room: rooms[0]._id,
-      patient: patients[0]._id
+      patient: patients[0]._id,
+      created_by: userID
     },
     {
       surgery_type: "Appendectomy",
       date: new Date("2024-11-15T10:00:00Z"),
       duration: 1,
       room: rooms[1]._id,
-      patient: patients[1]._id
+      patient: patients[1]._id,
+      created_by: userID
     }])
 
     // add surgeries to patients

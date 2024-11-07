@@ -5,12 +5,14 @@ const { checkUserPermission } = require('../middleware/auth')
 const {
 	readAll,
 	readOne,
+	readOneByUserId,
 	createData,
 	updateData,
 	deleteData
 } = require('../controllers/room.controller')
 
 router.get('/', checkUserPermission('rooms', 'read'), readAll)
+router.get('/myRooms', checkUserPermission('rooms', 'read'), readOneByUserId)
 router.get('/:id', checkUserPermission('rooms', 'read'), readOne)
 router.post('/', checkUserPermission('rooms', 'create'), createData)
 router.put('/:id', checkUserPermission('rooms', 'update'), updateData)

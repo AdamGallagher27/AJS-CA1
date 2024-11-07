@@ -28,6 +28,10 @@ const surgerySchema = new Schema({
     ref: 'Worker',
     required: [true, 'Worker field is required']
   }],
+	created_by: {
+		type: String,
+		required: [true, 'created by field is required']
+	}
 }, { timestamps: true });
 
 module.exports = model('Surgery', surgerySchema);
