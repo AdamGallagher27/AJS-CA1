@@ -3,7 +3,7 @@ const permissions = require('../config/permissions')
 
 
 const userLoggedIn = (req, res, next) => {
-	
+
 	const authHeader = req.headers?.authorization?.split(' ')
 	if (req.headers?.authorization && authHeader[0] === 'Bearer') {
 		jwt.verify(authHeader[1], process.env.JWT_SECRET, (err, decoded) => {
@@ -13,8 +13,8 @@ const userLoggedIn = (req, res, next) => {
 		})
 	}
 	else {
-		return res.status(401).json({message: 'Unauthorized: No Auth Token'})
-
+		req.user = undefined;
+		next();
 	}
 	return res.status(200)
 }
@@ -24,11 +24,11 @@ const checkUserPermission = (resource, action) => {
 
 		const userRole = req.user?.role
 
-		if(permissions[resource] && permissions[resource][action]?.includes(userRole)) {
+		if (permissions[resource] && permissions[resource][action]?.includes(userRole)) {
 			return next()
 		}
 
-		return res.status(403).json({message: `Unauthorised: Incorrect Permissions for ${action}`})
+		return res.status(403).json({ message: `Unauthorised: Incorrect Permissions for ${action}` })
 	}
 }
 

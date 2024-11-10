@@ -12,7 +12,7 @@ const {
 } = require('../controllers/worker.controller')
 
 router.get('/', checkUserPermission('workers', 'read'), readAll)
-router.get('/myWorkers', checkUserPermission('workers', 'read'), readOneByUserId)
+router.get('/myWorkers/read', checkUserPermission('workers', 'read'), readOneByUserId)
 router.get('/:id', checkUserPermission('workers', 'read'), readOne)
 router.post('/', checkUserPermission('workers', 'create'), createData)
 router.put('/:id', checkUserPermission('workers', 'update'), updateData)
