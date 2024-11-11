@@ -31,7 +31,7 @@ const login = (req, res) => {
           email: user.email,
           full_name: user.full_name,
           _id: user._id,
-          role:  user.role
+          role: user.role
         }, process.env.JWT_SECRET)
       })
 
@@ -39,7 +39,6 @@ const login = (req, res) => {
     .catch(err => {
       return res.status(500).json(err)
     })
-
 }
 const loginRequired = (req, res, next) => {
   if (req.user) {
@@ -52,8 +51,39 @@ const loginRequired = (req, res, next) => {
   }
 }
 
+const makeAdmin = (req, res, next) => {
+
+  const userId = req.query.userId
+  const body = { role: 'admin' }
+
+  if (!userId) {
+    return res.status(404).json({
+      message: `Invalid user id`
+    })
+  }
+
+  User.findByIdAndUpdate(userId, body, {
+    new: true,
+    runValidators: true
+  })
+    .then(() => {
+      return res.status(201).json({ message: `User: ${userId} has admin role` })
+    })
+    .catch(error => {
+
+      if (error.name === 'CastError') {
+        return res.status(404).json({
+          message: `No user found with id: ${userId}`
+        })
+      }
+
+      return res.status(500).json(error)
+    })
+}
+
 module.exports = {
   register,
   login,
-  loginRequired
+  loginRequired,
+  makeAdmin
 }

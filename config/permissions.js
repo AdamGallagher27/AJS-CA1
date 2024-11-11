@@ -29,6 +29,9 @@ const permissions = {
     update: ['admin'],
     delete: ['admin']
   },
+  users: {
+    makeAdmin: ['admin']
+  }
 }
 
 module.exports = permissions

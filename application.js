@@ -1,9 +1,8 @@
 require('dotenv').config()
 const express = require('express')
 const app = express()
-const { userLoggedIn } = require('./middleware/auth.js')
-const { loginRequired } = require('./controllers/user.controller.js')
-const jwt = require('jsonwebtoken')
+const { userLoggedIn, checkUserPermission } = require('./middleware/auth.js')
+const { loginRequired, makeAdmin } = require('./controllers/user.controller.js')
 
 console.log('Current environment:', process.env.ENVIRONMENT)
 
@@ -28,5 +27,8 @@ app.use('/api/rooms', loginRequired, require('./routes/rooms'))
 app.use('/api/surgeries', loginRequired, require('./routes/surgeries'))
 app.use('/api/patients', loginRequired, require('./routes/patients'))
 app.use('/api/workers', loginRequired, require('./routes/workers'))
+
+// this was originally in the users routes file but had to be moved here for user authenticaiton
+app.put('/api/makeAdmin', loginRequired, checkUserPermission('users', 'makeAdmin'), makeAdmin)
 
 module.exports = app
