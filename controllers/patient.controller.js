@@ -63,7 +63,7 @@ const readOne = (req, res) => {
 }
 
 const readOneByUserId = (req, res) => {
-  const userId = req.body.user._id
+  const userId = req.user._id
 
   Patient.find({created_by: userId}).populate('surgeries')
   .then(data => {
@@ -74,7 +74,7 @@ const readOneByUserId = (req, res) => {
     }
 
     return res.status(200).json({
-      message: `Patient created by user: ${userIs}`,
+      message: `Patients created by user: ${userId}`,
       data
     })
   })
@@ -85,7 +85,7 @@ const readOneByUserId = (req, res) => {
       })
     }
 
-    return res.status(500).json(err)
+    return res.status(500).json(error)
   })
 }
 

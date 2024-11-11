@@ -20,7 +20,7 @@ beforeAll(async () => {
 
   token = jwt.sign({
     email: user.email,
-    name:user.name,
+    name: user.name,
     _id: userId,
     role: user.role
   }, process.env.JWT_SECRET)
@@ -29,7 +29,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await disconnect()
-}) 
+})
 
 describe('get all patients', () => {
   test('should getrieve an array of patients', async () => {
@@ -53,59 +53,59 @@ describe('get a single patient', () => {
   })
 })
 
-// describe('get patients the admin created', () => {
-//   test('should retrieve an array of patients', async () => {
-//     const res = await request(app).get(`/api/patients/mypatients/read`).set('Authorization', `Bearer ${token}`)
+describe('get patients the admin created', () => {
+  test('should retrieve an array of patients', async () => {
+    const res = await request(app).get(`/api/patients/myPatients/read`).set('Authorization', `Bearer ${token}`)
 
-//     expect(res.statusCode).toEqual(200)
-//     expect(Array.isArray(res.body.data)).toBe(true)
-//     expect(res.body.data[0].title).toEqual('Central City patient')
-//   })
-// })
+    expect(res.statusCode).toEqual(200)
+    expect(Array.isArray(res.body.data)).toBe(true)
+    expect(res.body.data.some(item => item.first_name === 'Steve')).toBe(true)
+  })
+})
 
-// describe('create and retrieve a patient', () => {
+describe('create and retrieve a patient', () => {
 
-//   let newpatientId
+  let newpatientId
 
-//   test('should create a new patient', async () => {
-//     const newpatient = {
-//       title: 'Dublin patient',
-//       city: 'Dublin',
-//       daily_rate: 1500,
-//       number_of_departments: 10,
-//       has_emergency_services: true,
-//       created_by: userId
-//     }
-//     const res = await request(app).post('/api/patients').send(newpatient).set('Authorization', `Bearer ${token}`)
+  test('should create a new patient', async () => {
+    const newpatient = {
+      first_name: 'Sean',
+      last_name: 'Gallagher',
+      insurance: true,
+      age: 21,
+      condition: 'unwell',
+      surgeries: [],
+    }
+    const res = await request(app).post('/api/patients').send(newpatient).set('Authorization', `Bearer ${token}`)
 
-//     expect(res.statusCode).toEqual(201)
+    expect(res.statusCode).toEqual(201)
 
-//     newpatientId = res.body.data._id
-//   })
+    newpatientId = res.body.data._id
+  })
 
-//   test('should retrieve the new patient', async () => {
-//     const res = await request(app).get(`/api/patients/${newpatientId}`).set('Authorization', `Bearer ${token}`)
+  test('should retrieve the new patient', async () => {
+    const res = await request(app).get(`/api/patients/${newpatientId}`).set('Authorization', `Bearer ${token}`)
 
-//     expect(res.statusCode).toEqual(200)
-//     expect(res.body.data.title).toEqual('Dublin patient')
-//   })
-// })
+    expect(res.statusCode).toEqual(200)
+    expect(res.body.data.first_name).toEqual('Sean')
+  })
+})
 
-// describe('update and retrieve a patient', () => {
+describe('update and retrieve a patient', () => {
 
-//   test('should create a new patient', async () => {
-//     const updatedpatient = {
-//       title: 'Updated name for patient',
-//     }
-//     const res = await request(app).put(`/api/patients/${patientId}`).send(updatedpatient).set('Authorization', `Bearer ${token}`)
+  test('should update a new patient', async () => {
+    const updatedPatient = {
+      first_name: 'Updated name for patient',
+    }
+    const res = await request(app).put(`/api/patients/${patientId}`).send(updatedPatient).set('Authorization', `Bearer ${token}`)
 
-//     expect(res.statusCode).toEqual(201)
-//   })
+    expect(res.statusCode).toEqual(201)
+  })
 
-//   test('should retrieve the new patient', async () => {
-//     const res = await request(app).get(`/api/patients/${patientId}`).set('Authorization', `Bearer ${token}`)
+  test('should retrieve the new patient', async () => {
+    const res = await request(app).get(`/api/patients/${patientId}`).set('Authorization', `Bearer ${token}`)
 
-//     expect(res.statusCode).toEqual(200)
-//     expect(res.body.data.title).toEqual('Updated name for patient')
-//   })
-// })
+    expect(res.statusCode).toEqual(200)
+    expect(res.body.data.first_name).toEqual('Updated name for patient')
+  })
+})
