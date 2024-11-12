@@ -26,7 +26,7 @@ const seedDatabase = async () => {
       role: 'admin'
     })
 
-    const userID = user._id
+    const userId = user._id
 
     const hospital = await Hospital.create({
       title: 'Central City Hospital',
@@ -34,7 +34,7 @@ const seedDatabase = async () => {
       daily_rate: 1500,
       number_of_departments: 10,
       has_emergency_services: true,
-      created_by: userID
+      created_by: userId
     })
 
     const rooms = await Room.create([
@@ -44,7 +44,7 @@ const seedDatabase = async () => {
         availability_status: true,
         daily_rate: 300,
         hospital: hospital._id,
-        created_by: userID
+        created_by: userId
       },
       {
         room_number: 102,
@@ -52,7 +52,7 @@ const seedDatabase = async () => {
         availability_status: false,
         daily_rate: 200,
         hospital: hospital._id,
-        created_by: userID
+        created_by: userId
       }
     ])
 
@@ -65,19 +65,19 @@ const seedDatabase = async () => {
         worker_role: "doctor",
         first_name: "Alice",
         last_name: "Johnson",
-        created_by: userID
+        created_by: userId
       },
       {
         worker_role: "nurse",
         first_name: "Brian",
         last_name: "Smith",
-        created_by: userID
+        created_by: userId
       },
       {
         worker_role: "surgeon",
         first_name: "Claire",
         last_name: "Lee",
-        created_by: userID
+        created_by: userId
       },
     ])
 
@@ -87,7 +87,7 @@ const seedDatabase = async () => {
       insurance: true,
       age: 45,
       condition: "Appendicitis",
-      created_by: userID
+      created_by: userId
     },
     {
       first_name: "John",
@@ -95,7 +95,7 @@ const seedDatabase = async () => {
       insurance: false,
       age: 21,
       condition: "Leg break",
-      created_by: userID
+      created_by: userId
     }])
 
     const surgeries = await Surgery.create([{
@@ -104,7 +104,7 @@ const seedDatabase = async () => {
       duration: 2,
       room: rooms[0]._id,
       patient: patients[0]._id,
-      created_by: userID
+      created_by: userId
     },
     {
       surgery_type: "Appendectomy",
@@ -112,7 +112,7 @@ const seedDatabase = async () => {
       duration: 1,
       room: rooms[1]._id,
       patient: patients[1]._id,
-      created_by: userID
+      created_by: userId
     }])
 
     // add surgeries to patients

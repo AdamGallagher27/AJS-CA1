@@ -11,18 +11,6 @@ const addNewSurgeryToRoom = async (model, room_id, surgery_id) => {
   }
 }
 
-const deleteSurgeryFromRoom = async (model, room_id, surgery_id) => {
-  try {
-    await model.findByIdAndUpdate(
-      room_id,
-      { $pull: { surgerys: surgery_id } },
-    )
-  }
-  catch (error) {
-    console.error(error)
-  }
-}
-
 const addWorkerstoSurgery = async (surgery_id, worker_ids) => {
   try {
     await Worker.updateMany(
@@ -36,10 +24,10 @@ const addWorkerstoSurgery = async (surgery_id, worker_ids) => {
 }
 
 const readAll = (req, res) => {
-  Surgery.find()
-    .populate({ path: 'patient', match: { isDeleted: false } })
-    .populate({ path: 'room', match: { isDeleted: false } })
-    .populate({ path: 'workers', match: { isDeleted: false } })
+  Surgery.find({ is_deleted: false })
+    .populate({ path: 'patient', match: { is_deleted: false } })
+    .populate({ path: 'room', match: { is_deleted: false } })
+    .populate({ path: 'workers', match: { is_deleted: false } })
     .then(data => {
 
       if (data.length > 0) {
@@ -58,9 +46,12 @@ const readAll = (req, res) => {
 const readOne = (req, res) => {
   const id = req.params.id
 
-  Surgery.findById(id).populate('patient room workers')
+  Surgery.findById(id)
+    .populate({ path: 'patient', match: { is_deleted: false } })
+    .populate({ path: 'room', match: { is_deleted: false } })
+    .populate({ path: 'workers', match: { is_deleted: false } })
     .then(data => {
-      if (!data) {
+      if (!data || data.is_deleted) {
         return res.status(404).json({
           message: `Surgery with id: ${id} not found`
         })
@@ -85,7 +76,10 @@ const readOne = (req, res) => {
 const readAllByUserId = (req, res) => {
   const userId = req.user._id
 
-  Surgery.find({ created_by: userId }).populate('patient room workers')
+  Surgery.find({ created_by: userId, is_deleted: false })
+    .populate({ path: 'patient', match: { is_deleted: false } })
+    .populate({ path: 'room', match: { is_deleted: false } })
+    .populate({ path: 'workers', match: { is_deleted: false } })
     .then(data => {
       if (!data || data.length === 0) {
         return res.status(404).json({
@@ -143,11 +137,20 @@ const updateData = (req, res) => {
   const id = req.params.id
   const body = req.body
 
-  Surgery.findByIdAndUpdate(id, body, {
-    new: true,
-    runValidators: true
-  })
+  Surgery.findByIdAndUpdate(
+    { _id: id, is_deleted: false },
+    body,
+    {
+      new: true,
+      runValidators: true
+    }
+  )
     .then(data => {
+      if (!data) {
+        return res.status(404).json({
+          message: `Surgery with id: ${id} not found`
+        })
+      }
 
       if (body.workers) {
         addWorkerstoSurgery(data._id, body.workers)
@@ -177,19 +180,18 @@ const updateData = (req, res) => {
 
 const deleteData = (req, res) => {
   const id = req.params.id
+  const body = { is_deleted: true }
 
-  Surgery.findByIdAndDelete(id)
+  Surgery.findByIdAndUpdate(id, body)
     .then(async data => {
       if (!data) {
         return res.status(404).json({
           message: `Surgery with id: ${id} not found`
         })
       }
-
-      deleteSurgeryFromRoom(Room, data.room._id, data._id)
-
       return res.status(200).json({
-        message: `Surgery with id: ${id}`
+        message: `Surgery with id: ${id} deleted`,
+        data: data
       })
     })
     .catch(err => {
@@ -203,6 +205,47 @@ const deleteData = (req, res) => {
       return res.status(500).json(err)
     })
 }
+
+// const deleteSurgeryFromRoom = async (model, room_id, surgery_id) => {
+//   try {
+//     await model.findByIdAndUpdate(
+//       room_id,
+//       { $pull: { surgerys: surgery_id } },
+//     )
+//   }
+//   catch (error) {
+//     console.error(error)
+//   }
+// }
+
+// const deleteData = (req, res) => {
+//   const id = req.params.id
+
+//   Surgery.findByIdAndDelete(id)
+//     .then(async data => {
+//       if (!data) {
+//         return res.status(404).json({
+//           message: `Surgery with id: ${id} not found`
+//         })
+//       }
+
+//       deleteSurgeryFromRoom(Room, data.room._id, data._id)
+
+//       return res.status(200).json({
+//         message: `Surgery with id: ${id}`
+//       })
+//     })
+//     .catch(err => {
+
+//       if (err.name === 'CastError') {
+//         return res.status(404).json({
+//           message: `Surgery with id: ${id} not found`
+//         })
+//       }
+
+//       return res.status(500).json(err)
+//     })
+// }
 
 module.exports = {
   readAll,

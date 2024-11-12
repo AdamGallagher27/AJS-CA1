@@ -142,7 +142,6 @@ describe('create and then delete the hospital', () => {
     expect(res.body.data.is_deleted).toEqual(false)
   })
 
-  // this should fail atm because I have not fixed populate mama
   test('should not retrieve the new hospital', async () => {
     const res = await request(app).get(`/api/hospitals/${hospitalToBeDeletedId}`).set('Authorization', `Bearer ${token}`)
 

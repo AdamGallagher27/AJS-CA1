@@ -7,7 +7,7 @@ const addNewPatientToSurgery = async (model, surgery_id, patient_id) => {
 }
 
 const readAll = (req, res) => {
-  Patient.find({ is_deleted: false }).populate('surgeries')
+  Patient.find({ is_deleted: false }).populate({ path: 'surgeries', match: { is_deleted: false } })
     .then(data => {
 
       if (data.length > 0) {
@@ -25,7 +25,7 @@ const readAll = (req, res) => {
 const readOne = (req, res) => {
   const id = req.params.id
 
-  Patient.findById(id).populate('surgeries')
+  Patient.findById(id).populate({ path: 'surgeries', match: { is_deleted: false } })
     .then(data => {
       if (!data || data.is_deleted) {
         return res.status(404).json({
@@ -52,7 +52,7 @@ const readOne = (req, res) => {
 const readAllByUserId = (req, res) => {
   const userId = req.user._id
 
-  Patient.find({created_by: userId,  is_deleted: false}).populate('surgeries')
+  Patient.find({created_by: userId,  is_deleted: false}).populate({ path: 'surgeries', match: { is_deleted: false } })
   .then(data => {
     if(!data || data.length === 0) {
       return res.status(404).json({

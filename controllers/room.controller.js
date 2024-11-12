@@ -6,21 +6,8 @@ const addNewRoomToHospital = async (model, hospital_id, room_id) => {
   await model.findByIdAndUpdate(hospital_id, { $push: { rooms: room_id } })
 }
 
-const deleteRoomFromHospital = async (model, hospital_id, room_id) => {
-  try {
-    await model.findByIdAndUpdate(
-      hospital_id,
-      { $pull: { rooms: room_id } },
-    )
-  }
-  catch (error) {
-    console.error(error)
-  }
-
-}
-
 const readAll = (req, res) => {
-  Room.find().populate('surgeries hospital')
+  Room.find({ is_deleted: false }).populate({ path: 'surgeries', match: { is_deleted: false } }).populate({ path: 'hospital', match: { is_deleted: false } })
     .then(data => {
 
       if (data.length > 0) {
@@ -38,9 +25,9 @@ const readAll = (req, res) => {
 const readOne = (req, res) => {
   const id = req.params.id
 
-  Room.findById(id).populate('surgeries hospital')
+  Room.findById(id).populate({ path: 'surgeries', match: { is_deleted: false } }).populate({ path: 'hospital', match: { is_deleted: false } })
     .then(data => {
-      if (!data) {
+      if (!data || data.is_deleted) {
         return res.status(404).json({
           message: `Room with id: ${id} not found`
         })
@@ -65,32 +52,32 @@ const readOne = (req, res) => {
 const readAllByUserId = (req, res) => {
   const userId = req.user._id
 
-  Room.find({created_by: userId}).populate('surgeries hospital')
-  .then(data => {
-    if(!data || data.length === 0) {
-      return res.status(404).json({
-        message: `No Rooms found for user with id: ${userId}`
-      })
-    }
+  Room.find({ created_by: userId, is_deleted: false }).populate({ path: 'surgeries', match: { is_deleted: false } }).populate({ path: 'hospital', match: { is_deleted: false } })
+    .then(data => {
+      if (!data || data.length === 0) {
+        return res.status(404).json({
+          message: `No Rooms found for user with id: ${userId}`
+        })
+      }
 
-    return res.status(200).json({
-      message: `rooms created by user: ${userId}`,
-      data
+      return res.status(200).json({
+        message: `rooms created by user: ${userId}`,
+        data
+      })
     })
-  })
-  .catch(error => {
-    if(error.name === 'CastError') {
-      return res.status(404).json({
-        message: `Invalid user ID: ${userId}`,
-      })
-    }
+    .catch(error => {
+      if (error.name === 'CastError') {
+        return res.status(404).json({
+          message: `Invalid user ID: ${userId}`,
+        })
+      }
 
-    return res.status(500).json(err)
-  })
+      return res.status(500).json(err)
+    })
 }
 
 const createData = (req, res) => {
-  const body = { 
+  const body = {
     ...req.body,
     created_by: req.user._id
   }
@@ -117,11 +104,21 @@ const updateData = (req, res) => {
   const id = req.params.id
   const body = req.body
 
-  Room.findByIdAndUpdate(id, body, {
-    new: true,
-    runValidators: true
-  })
+  Room.findByIdAndUpdate(
+    { _id: id, is_deleted: false },
+    body,
+    {
+      new: true,
+      runValidators: true
+    }
+  )
     .then(async data => {
+      if (!data) {
+        return res.status(404).json({
+          message: `Room with id: ${id} not found`
+        })
+      }
+
       return res.status(201).json(data)
     })
     .catch(err => {
@@ -144,19 +141,18 @@ const updateData = (req, res) => {
 
 const deleteData = (req, res) => {
   const id = req.params.id
+  const body = { is_deleted: true }
 
-  Room.findByIdAndDelete(id)
+  Room.findByIdAndUpdate(id, body)
     .then(async data => {
       if (!data) {
         return res.status(404).json({
           message: `Room with id: ${id} not found`
         })
       }
-
-      deleteRoomFromHospital(Hospital, data.hospital._id, data._id)
-
       return res.status(200).json({
-        message: `Room with id: ${id}`
+        message: `Room with id: ${id} deleted`,
+        data: data
       })
     })
     .catch(err => {
@@ -170,6 +166,49 @@ const deleteData = (req, res) => {
       return res.status(500).json(err)
     })
 }
+
+// const deleteRoomFromHospital = async (model, hospital_id, room_id) => {
+//   try {
+//     await model.findByIdAndUpdate(
+//       hospital_id,
+//       { $pull: { rooms: room_id } },
+//     )
+//   }
+//   catch (error) {
+//     console.error(error)
+//   }
+
+// }
+
+
+// const deleteData = (req, res) => {
+//   const id = req.params.id
+
+//   Room.findByIdAndDelete(id)
+//     .then(async data => {
+//       if (!data) {
+//         return res.status(404).json({
+//           message: `Room with id: ${id} not found`
+//         })
+//       }
+
+//       deleteRoomFromHospital(Hospital, data.hospital._id, data._id)
+
+//       return res.status(200).json({
+//         message: `Room with id: ${id}`
+//       })
+//     })
+//     .catch(err => {
+
+//       if (err.name === 'CastError') {
+//         return res.status(404).json({
+//           message: `Room with id: ${id} not found`
+//         })
+//       }
+
+//       return res.status(500).json(err)
+//     })
+// }
 
 module.exports = {
   readAll,

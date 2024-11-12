@@ -108,3 +108,45 @@ describe('update and retrieve a room', () => {
     expect(res.body.data.room_number).toEqual(200)
   })
 })
+
+describe('create and then delete the room', () => {
+
+  let roomToBeDeletedId
+
+  test('should create a new room', async () => {
+    const newRoom = {
+      room_number: 105,
+      room_type: "ICU",
+      availability_status: true,
+      daily_rate: 300,
+      hospital: '672a8d389247e5a1dc998c45',
+      created_by: userId
+    }
+
+    const res = await request(app).post('/api/rooms').send(newRoom).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(201)
+
+    roomToBeDeletedId = res.body.data._id
+  })
+
+  test('should retrieve the new room', async () => {
+    const res = await request(app).get(`/api/rooms/${roomToBeDeletedId}`).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(200)
+    expect(res.body.data.room_number).toEqual(105)
+  })
+
+  test('should delete the new room', async () => {
+    const res = await request(app).delete(`/api/rooms/${roomToBeDeletedId}`).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(200)
+    expect(res.body.data.is_deleted).toEqual(false)
+  })
+
+  test('should not retrieve the new room', async () => {
+    const res = await request(app).get(`/api/rooms/${roomToBeDeletedId}`).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(404)
+  })
+})

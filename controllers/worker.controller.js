@@ -15,7 +15,7 @@ const addSurgerytoWorkers = async (worker_id, surgery_ids) => {
 }
 
 const readAll = (req, res) => {
-  Worker.find().populate('surgeries')
+  Worker.find({ is_deleted: false }).populate({ path: 'surgeries', match: { is_deleted: false } })
     .then(data => {
 
       if (data.length > 0) {
@@ -33,9 +33,9 @@ const readAll = (req, res) => {
 const readOne = (req, res) => {
   const id = req.params.id
 
-  Worker.findById(id).populate('surgeries')
+  Worker.findById(id).populate({ path: 'surgeries', match: { is_deleted: false } })
     .then(data => {
-      if (!data) {
+      if (!data || data.is_deleted) {
         return res.status(404).json({
           message: `Worker with id: ${id} not found`
         })
@@ -60,7 +60,7 @@ const readOne = (req, res) => {
 const readAllByUserId = (req, res) => {
   const userId = req.user._id
 
-  Worker.find({created_by: userId}).populate('surgeries')
+  Worker.find({ created_by: userId, is_deleted: false }).populate({ path: 'surgeries', match: { is_deleted: false } })
   .then(data => {
     if(!data || data.length === 0) {
       return res.status(404).json({
@@ -117,10 +117,14 @@ const updateData = (req, res) => {
   const id = req.params.id
   const body = req.body
 
-  Worker.findByIdAndUpdate(id, body, {
-    new: true,
-    runValidators: true
-  })
+  Worker.findByIdAndUpdate(
+    { _id: id, is_deleted: false },
+    body,
+    {
+      new: true,
+      runValidators: true
+    }
+  )
     .then(data => {
 
       if(body.surgeries) {
@@ -149,19 +153,18 @@ const updateData = (req, res) => {
 
 const deleteData = (req, res) => {
   const id = req.params.id
+  const body = { is_deleted: true }
 
-  Worker.findByIdAndDelete(id)
+  Worker.findByIdAndUpdate(id, body)
     .then(async data => {
       if (!data) {
         return res.status(404).json({
           message: `Worker with id: ${id} not found`
         })
       }
-
-      // deleteWorkerFromSurgery(Surgery, data.surgery_id, data._id)
-
       return res.status(200).json({
-        message: `Worker with id: ${id}`
+        message: `Worker with id: ${id} deleted`,
+        data: data
       })
     })
     .catch(err => {
@@ -175,6 +178,35 @@ const deleteData = (req, res) => {
       return res.status(500).json(err)
     })
 }
+
+// const deleteData = (req, res) => {
+//   const id = req.params.id
+
+//   Worker.findByIdAndDelete(id)
+//     .then(async data => {
+//       if (!data) {
+//         return res.status(404).json({
+//           message: `Worker with id: ${id} not found`
+//         })
+//       }
+
+//       // deleteWorkerFromSurgery(Surgery, data.surgery_id, data._id)
+
+//       return res.status(200).json({
+//         message: `Worker with id: ${id}`
+//       })
+//     })
+//     .catch(err => {
+
+//       if (err.name === 'CastError') {
+//         return res.status(404).json({
+//           message: `Worker with id: ${id} not found`
+//         })
+//       }
+
+//       return res.status(500).json(err)
+//     })
+// }
 
 module.exports = {
   readAll,

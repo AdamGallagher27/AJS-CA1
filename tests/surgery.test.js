@@ -107,3 +107,45 @@ describe('update and retrieve a surgery', () => {
     expect(res.body.data.surgery_type).toEqual('Heart Surgery')
   })
 })
+
+describe('create and then delete the surgery', () => {
+
+  let surgeryToBeDeletedId
+
+  test('should create a new surgery', async () => {
+    const newSurgery = {
+      surgery_type: 'Appendectomy',
+      date: new Date('2024-12-15T10:00:00Z'),
+      duration: 2,
+      room: '672a8d389247e5a1dc998c45',
+      patient: '672a8d389247e5a1dc998c45',
+      created_by: userId
+    }
+
+    const res = await request(app).post('/api/surgeries').send(newSurgery).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(201)
+
+    surgeryToBeDeletedId = res.body.data._id
+  })
+
+  test('should retrieve the new surgery', async () => {
+    const res = await request(app).get(`/api/surgeries/${surgeryToBeDeletedId}`).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(200)
+    expect(res.body.data.surgery_type).toEqual('Appendectomy')
+  })
+
+  test('should delete the new surgery', async () => {
+    const res = await request(app).delete(`/api/surgeries/${surgeryToBeDeletedId}`).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(200)
+    expect(res.body.data.is_deleted).toEqual(false)
+  })
+
+  test('should not retrieve the new surgery', async () => {
+    const res = await request(app).get(`/api/surgeries/${surgeryToBeDeletedId}`).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(404)
+  })
+})

@@ -105,3 +105,43 @@ describe('update and retrieve a worker', () => {
     expect(res.body.data.worker_role).toEqual('doctor')
   })
 })
+
+describe('create and then delete the worker', () => {
+
+  let workerToBeDeletedId
+
+  test('should create a new worker', async () => {
+    const newWorker = {
+      worker_role: 'nurse',
+      first_name: 'John',
+      last_name: 'Johnson',
+      created_by: userId
+    }
+
+    const res = await request(app).post('/api/workers').send(newWorker).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(201)
+
+    workerToBeDeletedId = res.body.data._id
+  })
+
+  test('should retrieve the new surgery', async () => {
+    const res = await request(app).get(`/api/workers/${workerToBeDeletedId}`).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(200)
+    expect(res.body.data.worker_role).toEqual('nurse')
+  })
+
+  test('should delete the new surgery', async () => {
+    const res = await request(app).delete(`/api/workers/${workerToBeDeletedId}`).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(200)
+    expect(res.body.data.is_deleted).toEqual(false)
+  })
+
+  test('should not retrieve the new surgery', async () => {
+    const res = await request(app).get(`/api/workers/${workerToBeDeletedId}`).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(404)
+  })
+})

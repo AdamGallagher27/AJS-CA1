@@ -2,7 +2,7 @@ const Hospital = require('../models/hospital.model')
 
 const readAll = (req, res) => {
   // find all hospitals and populate rooms field
-  Hospital.find({ is_deleted: false }).populate('rooms')
+  Hospital.find({ is_deleted: false }).populate({ path: 'rooms', match: { is_deleted: false } })
     .then(data => {
 
       if (data.length > 0) {
@@ -22,7 +22,7 @@ const readOne = (req, res) => {
   const id = req.params.id
 
   // find the hospital with the id and populate rooms
-  Hospital.findById(id).populate('rooms')
+  Hospital.findById(id).populate({ path: 'rooms', match: { is_deleted: false } })
     .then(data => {
       if (!data || data.is_deleted) {
         return res.status(404).json({
@@ -53,7 +53,7 @@ const readAllByUserId = (req, res) => {
   const userId = req.user._id
 
   // find hospitals created by the user populate rooms
-  Hospital.find({ created_by: userId, is_deleted: false }).populate('rooms')
+  Hospital.find({ created_by: userId, is_deleted: false }).populate({ path: 'rooms', match: { is_deleted: false } })
     .then(data => {
       if (!data || data.length === 0) {
         return res.status(404).json({
@@ -108,7 +108,7 @@ const updateData = (req, res) => {
   const body = req.body
 
   Hospital.findByIdAndUpdate(
-    { _id: id, isDeleted: false },
+    { _id: id, is_deleted: false },
     body,
     {
       new: true,
@@ -146,6 +146,34 @@ const updateData = (req, res) => {
 
 }
 
+const deleteData = (req, res) => {
+  const id = req.params.id
+  const body = { is_deleted: true }
+
+  Hospital.findByIdAndUpdate(id, body)
+    .then(async data => {
+      if (!data) {
+        return res.status(404).json({
+          message: `Hospital with id: ${id} not found`
+        })
+      }
+      return res.status(200).json({
+        message: `Hospital with id: ${id} deleted`,
+        data: data
+      })
+    })
+    .catch(err => {
+
+      if (err.name === 'CastError') {
+        return res.status(404).json({
+          message: `Hospital with id: ${id} not found`
+        })
+      }
+
+      return res.status(500).json(err)
+    })
+}
+
 // const deleteData = (req, res) => {
 //   const id = req.params.id
 //   Hospital.findByIdAndDelete(id)
@@ -176,64 +204,6 @@ const updateData = (req, res) => {
 //     })
 // }
 
-// const makeAdmin = (req, res, next) => {
-
-//   const userId = req.query.userId
-//   const body = { role: 'admin' }
-
-//   if (!userId) {
-//     return res.status(404).json({
-//       message: `Invalid user id`
-//     })
-//   }
-
-//   User.findByIdAndUpdate(userId, body, {
-//     new: true,
-//     runValidators: true
-//   })
-//     .then(() => {
-//       return res.status(201).json({ message: `User: ${userId} has admin role` })
-//     })
-//     .catch(error => {
-
-//       if (error.name === 'CastError') {
-//         return res.status(404).json({
-//           message: `No user found with id: ${userId}`
-//         })
-//       }
-
-//       return res.status(500).json(error)
-//     })
-// }
-
-
-const deleteData = (req, res) => {
-  const id = req.params.id
-  const body = { is_deleted: true }
-
-  Hospital.findByIdAndUpdate(id, body)
-    .then(async data => {
-      if (!data) {
-        return res.status(404).json({
-          message: `Hospital with id: ${id} not found`
-        })
-      }
-      return res.status(200).json({
-        message: `Hospital with id: ${id} deleted`,
-        data: data
-      })
-    })
-    .catch(err => {
-
-      if (err.name === 'CastError') {
-        return res.status(404).json({
-          message: `Hospital with id: ${id} not found`
-        })
-      }
-
-      return res.status(500).json(err)
-    })
-}
 
 module.exports = {
   readAll,
