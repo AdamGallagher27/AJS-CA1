@@ -69,10 +69,10 @@ describe('create and retrieve a room', () => {
   test('should create a new room', async () => {
     const newRoom = {
       room_number: 103,
-      room_type: "Recovery",
+      room_type: 'Recovery',
       availability_status: true,
       daily_rate: 250,
-      hospital: "672a8d389247e5a1dc998c45",
+      hospital: '672a8d389247e5a1dc998c45',
       created_by: userId
     }
     const res = await request(app).post('/api/rooms').send(newRoom).set('Authorization', `Bearer ${token}`)
@@ -116,7 +116,7 @@ describe('create and then delete the room', () => {
   test('should create a new room', async () => {
     const newRoom = {
       room_number: 105,
-      room_type: "ICU",
+      room_type: 'ICU',
       availability_status: true,
       daily_rate: 300,
       hospital: '672a8d389247e5a1dc998c45',

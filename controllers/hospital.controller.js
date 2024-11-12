@@ -12,8 +12,8 @@ const readAll = (req, res) => {
         return res.status(404).json('None found')
       }
     })
-    .catch(err => {
-      return res.status(500).json(err)
+    .catch(error => {
+      return res.status(500).json(error)
     })
 }
 
@@ -22,6 +22,7 @@ const readOne = (req, res) => {
   const id = req.params.id
 
   // find the hospital with the id and populate rooms
+  // check whether the populated rooms is deleted if they are do not add them to the populated filed
   Hospital.findById(id).populate({ path: 'rooms', match: { is_deleted: false } })
     .then(data => {
       if (!data || data.is_deleted) {
@@ -35,15 +36,14 @@ const readOne = (req, res) => {
         data
       })
     })
-    .catch(err => {
-
-      if (err.name === 'CastError') {
+    .catch(error => {
+      if (error.name === 'CastError') {
         return res.status(404).json({
           message: `Hospital with id: ${id} not found`
         })
       }
 
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     })
 }
 
@@ -62,7 +62,7 @@ const readAllByUserId = (req, res) => {
       }
 
       return res.status(200).json({
-        message: `Hosptils created by user: ${userId}`,
+        message: `Hospitils created by user: ${userId}`,
         data
       })
     })
@@ -89,24 +89,26 @@ const createData = (req, res) => {
     .then(data => {
 
       return res.status(201).json({
-        message: "Hospital created",
+        message: 'Hospital created',
         data
       })
     })
-    .catch(err => {
+    .catch(error => {
 
-      if (err.name === 'ValidationError') {
-        return res.status(422).json(err)
+      if (error.name === 'ValidationError') {
+        return res.status(422).json(error)
       }
 
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     })
 }
 
 const updateData = (req, res) => {
+  // get the hospital id and the request body
   const id = req.params.id
   const body = req.body
 
+  // find the hospital and update
   Hospital.findByIdAndUpdate(
     { _id: id, is_deleted: false },
     body,
@@ -116,6 +118,8 @@ const updateData = (req, res) => {
     }
   )
     .then(data => {
+
+      // check if the data exists if not return 404 error
       if (!data) {
         return res.status(404).json({
           message: `No hospitals found for user with id: ${userId}`
@@ -124,28 +128,29 @@ const updateData = (req, res) => {
 
       return res.status(201).json(data)
     })
-    .catch(err => {
+    .catch(error => {
 
-      if (err.name === 'CastError') {
+      if (error.name === 'CastError') {
 
-        if (err.kind === 'ObjectId') {
+        if (error.kind === 'ObjectId') {
           return res.status(404).json({
             message: `Hospital with id: ${id} not found`
           })
         }
         else {
           return res.status(422).json({
-            message: err.message
+            message: error.message
           })
         }
 
       }
 
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     })
 
 }
 
+// I originally had a hard delete but switched it out for a soft delete
 const deleteData = (req, res) => {
   const id = req.params.id
   const body = { is_deleted: true }
@@ -162,17 +167,19 @@ const deleteData = (req, res) => {
         data: data
       })
     })
-    .catch(err => {
+    .catch(error => {
 
-      if (err.name === 'CastError') {
+      if (error.name === 'CastError') {
         return res.status(404).json({
           message: `Hospital with id: ${id} not found`
         })
       }
 
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     })
 }
+
+// below was my old hard delete code
 
 // const deleteData = (req, res) => {
 //   const id = req.params.id
@@ -192,15 +199,15 @@ const deleteData = (req, res) => {
 //         message: `Hospital with id: ${id} deleted`
 //       })
 //     })
-//     .catch(err => {
+//     .catch(error => {
 
-//       if (err.name === 'CastError') {
+//       if (error.name === 'CastError') {
 //         return res.status(404).json({
 //           message: `Hospital with id: ${id} not found`
 //         })
 //       }
 
-//       return res.status(500).json(err)
+//       return res.status(500).json(error)
 //     })
 // }
 

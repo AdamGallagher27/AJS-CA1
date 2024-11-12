@@ -12,6 +12,7 @@ const seedDatabase = async () => {
 
     await connect()
 
+    // drop old data from db
     await Hospital.deleteMany({})
     await Patient.deleteMany({})
     await Room.deleteMany({})
@@ -40,7 +41,7 @@ const seedDatabase = async () => {
     const rooms = await Room.create([
       {
         room_number: 101,
-        room_type: "ICU",
+        room_type: 'ICU',
         availability_status: true,
         daily_rate: 300,
         hospital: hospital._id,
@@ -48,7 +49,7 @@ const seedDatabase = async () => {
       },
       {
         room_number: 102,
-        room_type: "ICU",
+        room_type: 'ICU',
         availability_status: false,
         daily_rate: 200,
         hospital: hospital._id,
@@ -62,53 +63,53 @@ const seedDatabase = async () => {
 
     const workers = await Worker.create([
       {
-        worker_role: "doctor",
-        first_name: "Alice",
-        last_name: "Johnson",
+        worker_role: 'doctor',
+        first_name: 'Alice',
+        last_name: 'Johnson',
         created_by: userId
       },
       {
-        worker_role: "nurse",
-        first_name: "Brian",
-        last_name: "Smith",
+        worker_role: 'nurse',
+        first_name: 'Brian',
+        last_name: 'Smith',
         created_by: userId
       },
       {
-        worker_role: "surgeon",
-        first_name: "Claire",
-        last_name: "Lee",
+        worker_role: 'surgeon',
+        first_name: 'Claire',
+        last_name: 'Lee',
         created_by: userId
       },
     ])
 
     const patients = await Patient.create([{
-      first_name: "Steve",
-      last_name: "Doe",
+      first_name: 'Steve',
+      last_name: 'Doe',
       insurance: true,
       age: 45,
-      condition: "Appendicitis",
+      condition: 'Appendicitis',
       created_by: userId
     },
     {
-      first_name: "John",
-      last_name: "Doe",
+      first_name: 'John',
+      last_name: 'Doe',
       insurance: false,
       age: 21,
-      condition: "Leg break",
+      condition: 'Leg break',
       created_by: userId
     }])
 
     const surgeries = await Surgery.create([{
-      surgery_type: "Appendectomy",
-      date: new Date("2024-12-15T10:00:00Z"),
+      surgery_type: 'Appendectomy',
+      date: new Date('2024-12-15T10:00:00Z'),
       duration: 2,
       room: rooms[0]._id,
       patient: patients[0]._id,
       created_by: userId
     },
     {
-      surgery_type: "Appendectomy",
-      date: new Date("2024-11-15T10:00:00Z"),
+      surgery_type: 'Appendectomy',
+      date: new Date('2024-11-15T10:00:00Z'),
       duration: 1,
       room: rooms[1]._id,
       patient: patients[1]._id,

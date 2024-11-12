@@ -4,8 +4,6 @@ const app = express()
 const { userLoggedIn, checkUserPermission } = require('./middleware/auth.js')
 const { loginRequired, makeAdmin } = require('./controllers/user.controller.js')
 
-console.log('Current environment:', process.env.ENVIRONMENT)
-
 // Only connect to the database if dev environment
 if (process.env.ENVIRONMENT === 'development') {
   const { connect } = require('./config/db')

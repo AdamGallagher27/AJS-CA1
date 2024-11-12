@@ -117,11 +117,11 @@ describe('create and then delete the patient', () => {
 
   test('should create a new patient', async () => {
     const newPatient = {
-      first_name: "Jolene",
-      last_name: "Doe",
+      first_name: 'Jolene',
+      last_name: 'Doe',
       insurance: false,
       age: 21,
-      condition: "Leg break",
+      condition: 'Leg break',
       created_by: userId
     }
     const res = await request(app).post('/api/patients').send(newPatient).set('Authorization', `Bearer ${token}`)

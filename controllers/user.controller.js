@@ -10,9 +10,9 @@ const register = (req, res) => {
       data.password = undefined
       return res.status(201).json(data)
     })
-    .catch(err => {
+    .catch(error => {
       return res.status(400).json({
-        message: err
+        message: error
       })
     })
 }
@@ -21,12 +21,12 @@ const login = (req, res) => {
     .then(user => {
       if (!user || !user.comparePassword(req.body.password)) {
         return res.status(401).json({
-          message: "authentication failed. Invalid User"
+          message: 'authentication failed. Invalid User'
         })
       }
 
       return res.status(200).json({
-        message: "Logged in succesfully",
+        message: 'Logged in succesfully',
         token: jwt.sign({
           email: user.email,
           full_name: user.full_name,
@@ -36,8 +36,8 @@ const login = (req, res) => {
       })
 
     })
-    .catch(err => {
-      return res.status(500).json(err)
+    .catch(error => {
+      return res.status(500).json(error)
     })
 }
 const loginRequired = (req, res, next) => {
@@ -46,7 +46,7 @@ const loginRequired = (req, res, next) => {
   }
   else {
     return res.status(401).json({
-      message: "Unauthorised User!"
+      message: 'Unauthorised User!'
     })
   }
 }

@@ -25,8 +25,8 @@ const readAll = (req, res) => {
         return res.status(404).json('None found')
       }
     })
-    .catch(err => {
-      return res.status(500).json(err)
+    .catch(error => {
+      return res.status(500).json(error)
     })
 }
 
@@ -46,14 +46,14 @@ const readOne = (req, res) => {
         data
       })
     })
-    .catch(err => {
-      if (err.name === 'CastError') {
+    .catch(error => {
+      if (error.name === 'CastError') {
         return res.status(404).json({
           message: `Worker with id: ${id} not found`
         })
       }
 
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     })
 }
 
@@ -100,16 +100,16 @@ const createData = (req, res) => {
       }
 
       return res.status(201).json({
-        message: "Worker created",
+        message: 'Worker created',
         data
       })
     })
-    .catch(err => {
-      if (err.name === 'ValidationError') {
-        return res.status(422).json(err)
+    .catch(error => {
+      if (error.name === 'ValidationError') {
+        return res.status(422).json(error)
       }
 
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     })
 }
 
@@ -133,21 +133,21 @@ const updateData = (req, res) => {
 
       return res.status(201).json(data)
     })
-    .catch(err => {
-      if (err.name === 'CastError') {
-        if (err.kind === 'ObjectId') {
+    .catch(error => {
+      if (error.name === 'CastError') {
+        if (error.kind === 'ObjectId') {
           return res.status(404).json({
             message: `Worker with id: ${id} not found`
           })
         }
         else {
           return res.status(422).json({
-            message: err.message
+            message: error.message
           })
         }
 
       }
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     })
 }
 
@@ -167,15 +167,15 @@ const deleteData = (req, res) => {
         data: data
       })
     })
-    .catch(err => {
+    .catch(error => {
 
-      if (err.name === 'CastError') {
+      if (error.name === 'CastError') {
         return res.status(404).json({
           message: `Worker with id: ${id} not found`
         })
       }
 
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     })
 }
 
@@ -196,15 +196,15 @@ const deleteData = (req, res) => {
 //         message: `Worker with id: ${id}`
 //       })
 //     })
-//     .catch(err => {
+//     .catch(error => {
 
-//       if (err.name === 'CastError') {
+//       if (error.name === 'CastError') {
 //         return res.status(404).json({
 //           message: `Worker with id: ${id} not found`
 //         })
 //       }
 
-//       return res.status(500).json(err)
+//       return res.status(500).json(error)
 //     })
 // }
 

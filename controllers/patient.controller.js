@@ -1,12 +1,14 @@
 const Patient = require('../models/patient.model')
 const Surgery = require('../models/surgery.model')
 
-
+// helper function to add the created patient to its related surgery table
 const addNewPatientToSurgery = async (model, surgery_id, patient_id) => {
   await model.findByIdAndUpdate(surgery_id, { $push: { patients: patient_id } })
 }
 
+
 const readAll = (req, res) => {
+  // get all patients that are not deleted and populate surgeries that are also not deleted
   Patient.find({ is_deleted: false }).populate({ path: 'surgeries', match: { is_deleted: false } })
     .then(data => {
 
@@ -17,16 +19,20 @@ const readAll = (req, res) => {
         return res.status(404).json('None found')
       }
     })
-    .catch(err => {
-      return res.status(500).json(err)
+    .catch(error => {
+      return res.status(500).json(error)
     })
 }
 
 const readOne = (req, res) => {
+  // get patient id from route params
   const id = req.params.id
 
+  // get the patient with the id and populate surgeries
   Patient.findById(id).populate({ path: 'surgeries', match: { is_deleted: false } })
     .then(data => {
+
+      // if data is underfined or deleted through a 404 error
       if (!data || data.is_deleted) {
         return res.status(404).json({
           message: `Patient with id: ${id} not found`
@@ -38,20 +44,23 @@ const readOne = (req, res) => {
         data
       })
     })
-    .catch(err => {
-      if (err.name === 'CastError') {
+    .catch(error => {
+      if (error.name === 'CastError') {
         return res.status(404).json({
           message: `Patient with id: ${id} not found`
         })
       }
 
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     })
 }
 
 const readAllByUserId = (req, res) => {
+  // get user id from request
   const userId = req.user._id
 
+  // get the patient that was created by the user thats not deleted
+  // populate surgies field if its not deleted
   Patient.find({created_by: userId,  is_deleted: false}).populate({ path: 'surgeries', match: { is_deleted: false } })
   .then(data => {
     if(!data || data.length === 0) {
@@ -77,39 +86,48 @@ const readAllByUserId = (req, res) => {
 }
 
 const createData = (req, res) => {
+
+  // add the user id to the request body
   const body = {
     ...req.body,
     created_by: req.user._id
   }
 
+  // use the body to create a new surgery
   Patient.create(body)
     .then(async data => {
+
+      // add the newly created patient to the surgery table
       addNewPatientToSurgery(Surgery, body.surgery_id, data._id)
 
       return res.status(201).json({
-        message: "Patient created",
+        message: 'Patient created',
         data
       })
     })
-    .catch(err => {
-      if (err.name === 'ValidationError') {
-        return res.status(422).json(err)
+    .catch(error => {
+      if (error.name === 'ValidationError') {
+        return res.status(422).json(error)
       }
 
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     })
 }
 
 const updateData = (req, res) => {
+
+  // get the user id and the updated body
   const id = req.params.id
   const body = req.body
 
+  // find the patient and update
   Patient.findByIdAndUpdate(id, body, {
     new: true,
     runValidators: true
   })
     .then(async data => {
 
+      // check that the patient they are trying to update is not deleted
       if(data.is_deleted) {
         return res.status(404).json({
           message: `No hospitals found for user with id: ${userId}`
@@ -118,26 +136,27 @@ const updateData = (req, res) => {
 
       return res.status(201).json(data)
     })
-    .catch(err => {
+    .catch(error => {
 
-      if (err.name === 'CastError') {
-        if (err.kind === 'ObjectId') {
+      if (error.name === 'CastError') {
+        if (error.kind === 'ObjectId') {
           return res.status(404).json({
             message: `Patient with id: ${id} not found`
           })
         }
         else {
           return res.status(422).json({
-            message: err.message
+            message: error.message
           })
         }
 
       }
 
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     })
 }
 
+// I originally had a hard delete but switched it out for a soft delete
 const deleteData = (req, res) => {
   const id = req.params.id
   const body = { is_deleted: true }
@@ -154,17 +173,19 @@ const deleteData = (req, res) => {
         data: data
       })
     })
-    .catch(err => {
+    .catch(error => {
 
-      if (err.name === 'CastError') {
+      if (error.name === 'CastError') {
         return res.status(404).json({
           message: `Patient with id: ${id} not found`
         })
       }
 
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     })
 }
+
+// below was my old hard delete code
 
 // const deletePatientFromSurgery = async (model, surgery_id, patient_id) => {
 //   try {
@@ -196,15 +217,15 @@ const deleteData = (req, res) => {
 //         message: `Patient with id: ${id}`
 //       })
 //     })
-//     .catch(err => {
+//     .catch(error => {
 
-//       if (err.name === 'CastError') {
+//       if (error.name === 'CastError') {
 //         return res.status(404).json({
 //           message: `Patient with id: ${id} not found`
 //         })
 //       }
 
-//       return res.status(500).json(err)
+//       return res.status(500).json(error)
 //     })
 // }
 

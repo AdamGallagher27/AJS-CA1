@@ -58,7 +58,7 @@ describe('get surgeries the admin created', () => {
 
     expect(res.statusCode).toEqual(200)
     expect(Array.isArray(res.body.data)).toBe(true)
-    expect(res.body.data.some(item => item.surgery_type === "Appendectomy")).toBe(true)
+    expect(res.body.data.some(item => item.surgery_type === 'Appendectomy')).toBe(true)
   })
 })
 
