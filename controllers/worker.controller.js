@@ -57,7 +57,7 @@ const readOne = (req, res) => {
     })
 }
 
-const readOneByUserId = (req, res) => {
+const readAllByUserId = (req, res) => {
   const userId = req.user._id
 
   Worker.find({created_by: userId}).populate('surgeries')
@@ -179,7 +179,7 @@ const deleteData = (req, res) => {
 module.exports = {
   readAll,
   readOne,
-  readOneByUserId,
+  readAllByUserId,
   createData,
   updateData,
   deleteData

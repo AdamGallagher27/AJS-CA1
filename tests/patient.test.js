@@ -109,3 +109,46 @@ describe('update and retrieve a patient', () => {
     expect(res.body.data.first_name).toEqual('Updated name for patient')
   })
 })
+
+
+describe('create and then delete the patient', () => {
+
+  let patientToBeDeletedId
+
+  test('should create a new patient', async () => {
+    const newPatient = {
+      first_name: "Jolene",
+      last_name: "Doe",
+      insurance: false,
+      age: 21,
+      condition: "Leg break",
+      created_by: userId
+    }
+    const res = await request(app).post('/api/patients').send(newPatient).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(201)
+
+    patientToBeDeletedId = res.body.data._id
+  })
+
+  test('should retrieve the new hospital', async () => {
+    const res = await request(app).get(`/api/patients/${patientToBeDeletedId}`).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(200)
+    expect(res.body.data.first_name).toEqual('Jolene')
+  })
+
+  test('should delete the new hospital', async () => {
+    const res = await request(app).delete(`/api/patients/${patientToBeDeletedId}`).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(200)
+    expect(res.body.data.is_deleted).toEqual(false)
+  })
+
+  // this should fail atm because I have not fixed populate mama
+  test('should not retrieve the new hospital', async () => {
+    const res = await request(app).get(`/api/patients/${patientToBeDeletedId}`).set('Authorization', `Bearer ${token}`)
+
+    expect(res.statusCode).toEqual(404)
+  })
+})

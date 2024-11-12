@@ -62,7 +62,7 @@ const readOne = (req, res) => {
     })
 }
 
-const readOneByUserId = (req, res) => {
+const readAllByUserId = (req, res) => {
   const userId = req.user._id
 
   Room.find({created_by: userId}).populate('surgeries hospital')
@@ -174,7 +174,7 @@ const deleteData = (req, res) => {
 module.exports = {
   readAll,
   readOne,
-  readOneByUserId,
+  readAllByUserId,
   createData,
   updateData,
   deleteData

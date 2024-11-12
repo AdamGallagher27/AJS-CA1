@@ -36,7 +36,10 @@ const addWorkerstoSurgery = async (surgery_id, worker_ids) => {
 }
 
 const readAll = (req, res) => {
-  Surgery.find().populate('patient room workers')
+  Surgery.find()
+    .populate({ path: 'patient', match: { isDeleted: false } })
+    .populate({ path: 'room', match: { isDeleted: false } })
+    .populate({ path: 'workers', match: { isDeleted: false } })
     .then(data => {
 
       if (data.length > 0) {
@@ -79,31 +82,31 @@ const readOne = (req, res) => {
     })
 }
 
-const readOneByUserId = (req, res) => {
+const readAllByUserId = (req, res) => {
   const userId = req.user._id
 
-  Surgery.find({created_by: userId}).populate('patient room workers')
-  .then(data => {
-    if(!data || data.length === 0) {
-      return res.status(404).json({
-        message: `No Surgeries found for user with id: ${userId}`
-      })
-    }
+  Surgery.find({ created_by: userId }).populate('patient room workers')
+    .then(data => {
+      if (!data || data.length === 0) {
+        return res.status(404).json({
+          message: `No Surgeries found for user with id: ${userId}`
+        })
+      }
 
-    return res.status(200).json({
-      message: `Surgery created by user: ${userId}`,
-      data
+      return res.status(200).json({
+        message: `Surgery created by user: ${userId}`,
+        data
+      })
     })
-  })
-  .catch(error => {
-    if(error.name === 'CastError') {
-      return res.status(404).json({
-        message: `Invalid user ID: ${userId}`,
-      })
-    }
+    .catch(error => {
+      if (error.name === 'CastError') {
+        return res.status(404).json({
+          message: `Invalid user ID: ${userId}`,
+        })
+      }
 
-    return res.status(500).json(err)
-  })
+      return res.status(500).json(err)
+    })
 }
 
 const createData = (req, res) => {
@@ -204,7 +207,7 @@ const deleteData = (req, res) => {
 module.exports = {
   readAll,
   readOne,
-  readOneByUserId,
+  readAllByUserId,
   createData,
   updateData,
   deleteData

@@ -1,3 +1,4 @@
+// this config holds the permissions for each opperation on each resources
 const permissions = {
   hospitals: {
     read: ['user', 'admin'],

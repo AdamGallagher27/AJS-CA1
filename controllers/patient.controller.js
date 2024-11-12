@@ -6,21 +6,8 @@ const addNewPatientToSurgery = async (model, surgery_id, patient_id) => {
   await model.findByIdAndUpdate(surgery_id, { $push: { patients: patient_id } })
 }
 
-const deletePatientFromSurgery = async (model, surgery_id, patient_id) => {
-  try {
-    await model.findByIdAndUpdate(
-      surgery_id,
-      { $pull: { patients: patient_id } },
-    )
-  }
-  catch (error) {
-    console.error(error)
-  }
-
-}
-
 const readAll = (req, res) => {
-  Patient.find().populate('surgeries')
+  Patient.find({ is_deleted: false }).populate('surgeries')
     .then(data => {
 
       if (data.length > 0) {
@@ -40,7 +27,7 @@ const readOne = (req, res) => {
 
   Patient.findById(id).populate('surgeries')
     .then(data => {
-      if (!data) {
+      if (!data || data.is_deleted) {
         return res.status(404).json({
           message: `Patient with id: ${id} not found`
         })
@@ -62,10 +49,10 @@ const readOne = (req, res) => {
     })
 }
 
-const readOneByUserId = (req, res) => {
+const readAllByUserId = (req, res) => {
   const userId = req.user._id
 
-  Patient.find({created_by: userId}).populate('surgeries')
+  Patient.find({created_by: userId,  is_deleted: false}).populate('surgeries')
   .then(data => {
     if(!data || data.length === 0) {
       return res.status(404).json({
@@ -122,6 +109,13 @@ const updateData = (req, res) => {
     runValidators: true
   })
     .then(async data => {
+
+      if(data.is_deleted) {
+        return res.status(404).json({
+          message: `No hospitals found for user with id: ${userId}`
+        })
+      }
+
       return res.status(201).json(data)
     })
     .catch(err => {
@@ -146,19 +140,18 @@ const updateData = (req, res) => {
 
 const deleteData = (req, res) => {
   const id = req.params.id
+  const body = { is_deleted: true }
 
-  Patient.findByIdAndDelete(id)
+  Patient.findByIdAndUpdate(id, body)
     .then(async data => {
       if (!data) {
         return res.status(404).json({
           message: `Patient with id: ${id} not found`
         })
       }
-
-      deletePatientFromSurgery(Surgery, data.surgery_id, data._id)
-
       return res.status(200).json({
-        message: `Patient with id: ${id}`
+        message: `Patient with id: ${id} deleted`,
+        data: data
       })
     })
     .catch(err => {
@@ -173,10 +166,52 @@ const deleteData = (req, res) => {
     })
 }
 
+// const deletePatientFromSurgery = async (model, surgery_id, patient_id) => {
+//   try {
+//     await model.findByIdAndUpdate(
+//       surgery_id,
+//       { $pull: { patients: patient_id } },
+//     )
+//   }
+//   catch (error) {
+//     console.error(error)
+//   }
+
+// }
+
+// const deleteData = (req, res) => {
+//   const id = req.params.id
+
+//   Patient.findByIdAndDelete(id)
+//     .then(async data => {
+//       if (!data) {
+//         return res.status(404).json({
+//           message: `Patient with id: ${id} not found`
+//         })
+//       }
+
+//       deletePatientFromSurgery(Surgery, data.surgery_id, data._id)
+
+//       return res.status(200).json({
+//         message: `Patient with id: ${id}`
+//       })
+//     })
+//     .catch(err => {
+
+//       if (err.name === 'CastError') {
+//         return res.status(404).json({
+//           message: `Patient with id: ${id} not found`
+//         })
+//       }
+
+//       return res.status(500).json(err)
+//     })
+// }
+
 module.exports = {
   readAll,
   readOne,
-  readOneByUserId,
+  readAllByUserId,
   createData,
   updateData,
   deleteData

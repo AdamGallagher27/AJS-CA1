@@ -6,7 +6,7 @@ const { loginRequired } = require('../controllers/user.controller')
 const {
 	readAll,
 	readOne,
-	readOneByUserId,
+	readAllByUserId,
 	createData,
 	updateData,
 	deleteData
@@ -15,7 +15,7 @@ const {
 router.get('/', readAll)
 router.get('/:id', readOne)
 
-router.get('/myHospitals/read', loginRequired,  checkUserPermission('hospitals', 'read'), readOneByUserId)
+router.get('/myHospitals/read', loginRequired,  checkUserPermission('hospitals', 'read'), readAllByUserId)
 router.post('/', loginRequired, checkUserPermission('hospitals', 'create'), createData)
 router.put('/:id', loginRequired, checkUserPermission('hospitals', 'update'), updateData)
 router.delete('/:id', loginRequired, checkUserPermission('hospitals', 'delete'), deleteData)

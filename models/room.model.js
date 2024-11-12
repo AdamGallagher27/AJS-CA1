@@ -30,6 +30,11 @@ const roomSchema = new Schema({
 	created_by: {
 		type: String,
 		required: [true, 'created by field is required']
+	},
+	is_deleted: {
+		type: Boolean,
+		required: false,
+		default: false
 	}
 }, { timestamps: true });
 

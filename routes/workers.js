@@ -5,14 +5,14 @@ const { checkUserPermission } = require('../middleware/auth')
 const {
 	readAll,
 	readOne,
-	readOneByUserId,
+	readAllByUserId,
 	createData,
 	updateData,
 	deleteData
 } = require('../controllers/worker.controller')
 
 router.get('/', checkUserPermission('workers', 'read'), readAll)
-router.get('/myWorkers/read', checkUserPermission('workers', 'read'), readOneByUserId)
+router.get('/myWorkers/read', checkUserPermission('workers', 'read'), readAllByUserId)
 router.get('/:id', checkUserPermission('workers', 'read'), readOne)
 router.post('/', checkUserPermission('workers', 'create'), createData)
 router.put('/:id', checkUserPermission('workers', 'update'), updateData)

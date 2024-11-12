@@ -5,14 +5,14 @@ const { checkUserPermission } = require('../middleware/auth')
 const {
 	readAll,
 	readOne,
-	readOneByUserId,
+	readAllByUserId,
 	createData,
 	updateData,
 	deleteData
 } = require('../controllers/patient.controller')
 
 router.get('/', checkUserPermission('patients', 'read'), readAll)
-router.get('/myPatients/read', checkUserPermission('patients', 'read'), readOneByUserId)
+router.get('/myPatients/read', checkUserPermission('patients', 'read'), readAllByUserId)
 router.get('/:id', checkUserPermission('patients', 'read'), readOne)
 router.post('/', checkUserPermission('patients', 'create'), createData)
 router.put('/:id', checkUserPermission('patients', 'update'), updateData)
