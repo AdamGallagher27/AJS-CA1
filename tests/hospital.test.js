@@ -66,15 +66,27 @@ describe('create and retrieve a hospital', () => {
   let newHospitalId
 
   test('should create a new hospital', async () => {
-    const newHospital = {
-      title: 'Dublin Hospital',
-      city: 'Dublin',
-      daily_rate: 1500,
-      number_of_departments: 10,
-      has_emergency_services: true,
-      created_by: userId
-    }
-    const res = await request(app).post('/api/hospitals').send(newHospital).set('Authorization', `Bearer ${token}`)
+
+    // this used to be sent in the request but it cannot be sent like this with multipart form data
+    // const newHospital = {
+    //   title: 'Dublin Hospital',
+    //   city: 'Dublin',
+    //   daily_rate: 1500,
+    //   number_of_departments: 10,
+    //   has_emergency_services: true,
+    //   created_by: userId
+    // }
+
+    // this is how you send multipart data
+    const res = await request(app).post('/api/hospitals')
+      .field('title', 'Dublin Hospital')
+      .field('city', 'Dublin')
+      .field('daily_rate', 1500)
+      .field('number_of_departments', 10)
+      .field('has_emergency_services', true)
+      .set('Authorization', `Bearer ${token}`)
+
+    console.log(res.text)
 
     expect(res.statusCode).toEqual(201)
 
@@ -92,10 +104,13 @@ describe('create and retrieve a hospital', () => {
 describe('update and retrieve a hospital', () => {
 
   test('should create a new hospital', async () => {
-    const updatedHospital = {
-      title: 'Updated name for hospital',
-    }
-    const res = await request(app).put(`/api/hospitals/${hospitalId}`).send(updatedHospital).set('Authorization', `Bearer ${token}`)
+
+    // same as above this needs to be multipart not json
+    // const updatedHospital = {
+    //   title: 'Updated name for hospital',
+    // }
+
+    const res = await request(app).put(`/api/hospitals/${hospitalId}`).field('title', 'Updated name for hospital').set('Authorization', `Bearer ${token}`)
 
     expect(res.statusCode).toEqual(201)
   })
@@ -113,15 +128,13 @@ describe('create and then delete the hospital', () => {
   let hospitalToBeDeletedId
 
   test('should create a new hospital', async () => {
-    const newHospital = {
-      title: 'Delete me',
-      city: 'Dublin',
-      daily_rate: 1500,
-      number_of_departments: 10,
-      has_emergency_services: true,
-      created_by: userId
-    }
-    const res = await request(app).post('/api/hospitals').send(newHospital).set('Authorization', `Bearer ${token}`)
+    const res = await request(app).post('/api/hospitals')
+      .field('title', 'Delete me')
+      .field('city', 'Dublin')
+      .field('daily_rate', 1500)
+      .field('number_of_departments', 10)
+      .field('has_emergency_services', true)
+      .set('Authorization', `Bearer ${token}`)
 
     expect(res.statusCode).toEqual(201)
 

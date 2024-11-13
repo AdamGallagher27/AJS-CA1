@@ -1,5 +1,37 @@
 const Hospital = require('../models/hospital.model')
 
+// destructure env variables
+const { MY_AWS_BUCKET, IMAGE_URL, MY_AWS_ACCESS_KEY_ID, MY_AWS_REGION, MY_AWS_SECRET_ACCESS_KEY } = process.env
+
+// delete image from s3 bucket
+const deleteImage = async (filename) => {
+  const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3')
+
+  // create a s3 client
+  const s3 = new S3Client({
+    region: MY_AWS_REGION,
+    credentials: {
+      accessKeyId: MY_AWS_ACCESS_KEY_ID,
+      secretAccessKey: MY_AWS_SECRET_ACCESS_KEY
+    }
+  })
+
+  try {
+    // send the delete command to the s3 bucket
+    const data = await s3.send(new DeleteObjectCommand({
+      Bucket: MY_AWS_BUCKET,
+      Key: filename
+    }))
+
+    console.log('Object deleted', data)
+
+  } catch (error) {
+    console.error(error)
+  }
+
+}
+
+
 const readAll = (req, res) => {
   // find all hospitals and populate rooms field
   Hospital.find({ is_deleted: false }).populate({ path: 'rooms', match: { is_deleted: false } })
@@ -29,6 +61,11 @@ const readOne = (req, res) => {
         return res.status(404).json({
           message: `Hospital with id: ${id} not found`
         })
+      }
+
+      // if image path is found add the aws url to it
+      if (data.image_path) {
+        data.image_path = IMAGE_URL + data.image_path
       }
 
       return res.status(200).json({
@@ -78,10 +115,17 @@ const readAllByUserId = (req, res) => {
 }
 
 const createData = (req, res) => {
+  // get the image file from req.files
+  const imageFile = req?.files[0]
   // get the new hospital body
-  const body = {
+  let body = {
     ...req.body,
     created_by: req.user._id
+  }
+
+    // if image file is truthy assign the key (file name) to the body image path
+  if (imageFile) {
+    body.image_path = imageFile.key
   }
 
   // create with the the request body
@@ -99,14 +143,22 @@ const createData = (req, res) => {
         return res.status(422).json(error)
       }
 
+      console.log(error)
       return res.status(500).json(error)
     })
 }
 
 const updateData = (req, res) => {
+  // get the image file from req.files
+  const imageFile = req?.files[0]
   // get the hospital id and the request body
   const id = req.params.id
-  const body = req.body
+  let body = req.body
+  
+  // if image file is truthy assign the key (file name) to the body image path
+  if (imageFile) {
+    body.image_path = imageFile.key
+  }
 
   // find the hospital and update
   Hospital.findByIdAndUpdate(
@@ -126,24 +178,26 @@ const updateData = (req, res) => {
         })
       }
 
+      if (data.image_path) {
+        deleteImage(data.image_path)
+      }
+      
       return res.status(201).json(data)
     })
     .catch(error => {
 
-      // if (error.name === 'CastError') {
+      if (error.name === 'CastError') {
 
-      //   if (error.kind === 'ObjectId') {
-      //     return res.status(404).json({
-      //       message: `Hospital with id: ${id} not found`
-      //     })
-      //   }
-      //   else {
-      //     return res.status(422).json(error)
-      //   }
+        if (error.kind === 'ObjectId') {
+          return res.status(404).json({
+            message: `Hospital with id: ${id} not found`
+          })
+        }
+        else {
+          return res.status(422).json(error)
+        }
 
-      // }
-      
-      console.log(error)
+      }
 
       return res.status(500).json(error)
     })

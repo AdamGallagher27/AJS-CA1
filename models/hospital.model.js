@@ -34,7 +34,11 @@ const hospitalSchema = new Schema({
 		type: Boolean,
 		required: false,
 		default: false
-	}
+	},
+	image_path: {
+		type: String,
+		required: false,
+},
 }, { timestamps: true })
 
 // sanitization middleware

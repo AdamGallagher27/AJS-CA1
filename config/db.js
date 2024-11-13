@@ -5,6 +5,9 @@ const mongoose = require('mongoose')
 // instantiate db variable
 let db
 
+// destructure env variables
+const { ENVIRONMENT, DB_URL, TEST_DB_URL } = process.env
+
 const connect = async () => {
 	db = null
 
@@ -13,7 +16,7 @@ const connect = async () => {
 		mongoose.set('strictQuery', false)
 
 		// if the environment is set to developement use dev url else use test url
-		const dbUrl = process.env.ENVIRONMENT === 'development' ? process.env.DB_URL : process.env.TEST_DB_URL
+		const dbUrl = ENVIRONMENT === 'development' ? DB_URL : TEST_DB_URL
 		await mongoose.connect(dbUrl)
 
 		console.log('Connected successfully to db')
