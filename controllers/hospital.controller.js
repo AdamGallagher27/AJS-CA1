@@ -62,7 +62,7 @@ const readAllByUserId = (req, res) => {
       }
 
       return res.status(200).json({
-        message: `Hospitils created by user: ${userId}`,
+        message: `Hospitals created by user: ${userId}`,
         data
       })
     })
@@ -122,7 +122,7 @@ const updateData = (req, res) => {
       // check if the data exists if not return 404 error
       if (!data) {
         return res.status(404).json({
-          message: `No hospitals found for user with id: ${userId}`
+          message: `No hospitals found with id: ${id}`
         })
       }
 
@@ -130,20 +130,20 @@ const updateData = (req, res) => {
     })
     .catch(error => {
 
-      if (error.name === 'CastError') {
+      // if (error.name === 'CastError') {
 
-        if (error.kind === 'ObjectId') {
-          return res.status(404).json({
-            message: `Hospital with id: ${id} not found`
-          })
-        }
-        else {
-          return res.status(422).json({
-            message: error.message
-          })
-        }
+      //   if (error.kind === 'ObjectId') {
+      //     return res.status(404).json({
+      //       message: `Hospital with id: ${id} not found`
+      //     })
+      //   }
+      //   else {
+      //     return res.status(422).json(error)
+      //   }
 
-      }
+      // }
+      
+      console.log(error)
 
       return res.status(500).json(error)
     })

@@ -33,4 +33,17 @@ userSchema.methods.comparePassword = function (password) {
   })
 }
 
+// sanitization middleware
+userSchema.pre('save', function(next) {
+
+	const removeSpecialChars = (str) => {
+			return str.replace(/[<>\/\\&%$#@!^*()+=~`|{}[\]:"']/g, '') 
+	}
+
+  // not sanitizing password as i want them to be able to add special charachters
+	this.full_name = removeSpecialChars(this.full_name)
+
+	next()
+})
+
 module.exports = model('User', userSchema)

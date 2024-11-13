@@ -2,6 +2,7 @@ const Surgery = require('../models/surgery.model')
 const Room = require('../models/room.model')
 const Worker = require('../models/worker.model')
 
+// helper function to add new surgery to room table
 const addNewSurgeryToRoom = async (model, room_id, surgery_id) => {
   try {
     await model.findByIdAndUpdate(room_id, { $push: { surgeries: surgery_id } })
@@ -11,7 +12,8 @@ const addNewSurgeryToRoom = async (model, room_id, surgery_id) => {
   }
 }
 
-const addWorkerstoSurgery = async (surgery_id, worker_ids) => {
+// helper function to add surgeries to workers table
+const addSurgerytoWorkers = async (surgery_id, worker_ids) => {
   try {
     await Worker.updateMany(
       { _id: { $in: worker_ids } },
@@ -24,6 +26,7 @@ const addWorkerstoSurgery = async (surgery_id, worker_ids) => {
 }
 
 const readAll = (req, res) => {
+  // find surgeries that are not deleted and populate patient room and workers also make sure they are not deleted
   Surgery.find({ is_deleted: false })
     .populate({ path: 'patient', match: { is_deleted: false } })
     .populate({ path: 'room', match: { is_deleted: false } })
@@ -46,6 +49,7 @@ const readAll = (req, res) => {
 const readOne = (req, res) => {
   const id = req.params.id
 
+  // find one surgery by id thats not deleted and populate patient room and workers also make sure they are not deleted
   Surgery.findById(id)
     .populate({ path: 'patient', match: { is_deleted: false } })
     .populate({ path: 'room', match: { is_deleted: false } })
@@ -76,6 +80,8 @@ const readOne = (req, res) => {
 const readAllByUserId = (req, res) => {
   const userId = req.user._id
 
+  // find surgeries that are not deleted and the user created using the user id
+  //  and populate patient room and workers also make sure they are not deleted
   Surgery.find({ created_by: userId, is_deleted: false })
     .populate({ path: 'patient', match: { is_deleted: false } })
     .populate({ path: 'room', match: { is_deleted: false } })
@@ -104,19 +110,24 @@ const readAllByUserId = (req, res) => {
 }
 
 const createData = (req, res) => {
+  // add user id to the request body
   const body = {
     ...req.body,
     created_by: req.user._id
   }
   let surgeryId = ''
 
+  // create a new surgery to the body
   Surgery.create(body)
     .then(data => {
       surgeryId = data._id
+
+      // add the new surgery to the room table
       addNewSurgeryToRoom(Room, body.room._id, surgeryId)
 
+      // if workers are included in the body update workers table with this surgery
       if (body.workers) {
-        addWorkerstoSurgery(surgeryId, body.workers)
+        addSurgerytoWorkers(surgeryId, body.workers)
       }
 
       return res.status(201).json({
@@ -137,6 +148,7 @@ const updateData = (req, res) => {
   const id = req.params.id
   const body = req.body
 
+  // find the requested surgery and update
   Surgery.findByIdAndUpdate(
     { _id: id, is_deleted: false },
     body,
@@ -152,8 +164,9 @@ const updateData = (req, res) => {
         })
       }
 
+      // if workers are included in the body update workers table with this surgery
       if (body.workers) {
-        addWorkerstoSurgery(data._id, body.workers)
+        addSurgerytoWorkers(data._id, body.workers)
       }
 
       return res.status(201).json(data)
@@ -178,6 +191,7 @@ const updateData = (req, res) => {
     })
 }
 
+// below is my soft delete i orignally had hard delete
 const deleteData = (req, res) => {
   const id = req.params.id
   const body = { is_deleted: true }
@@ -205,6 +219,8 @@ const deleteData = (req, res) => {
       return res.status(500).json(error)
     })
 }
+
+// this is my old hard delete
 
 // const deleteSurgeryFromRoom = async (model, room_id, surgery_id) => {
 //   try {

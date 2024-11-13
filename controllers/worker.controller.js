@@ -1,8 +1,8 @@
 const Worker = require('../models/worker.model')
 const Surgery = require('../models/surgery.model')
 
-
-const addSurgerytoWorkers = async (worker_id, surgery_ids) => {
+// helper function to add workers to surgeries table
+const addWorkersToSurgeries = async (worker_id, surgery_ids) => {
   try {
     await Surgery.updateMany(
       { _id: { $in: surgery_ids } },
@@ -15,6 +15,7 @@ const addSurgerytoWorkers = async (worker_id, surgery_ids) => {
 }
 
 const readAll = (req, res) => {
+  // get all workers that are not deleted populate surgeries that are not deleted
   Worker.find({ is_deleted: false }).populate({ path: 'surgeries', match: { is_deleted: false } })
     .then(data => {
 
@@ -33,6 +34,7 @@ const readAll = (req, res) => {
 const readOne = (req, res) => {
   const id = req.params.id
 
+  // get worker by id that is not deleted populate surgeries that are not deleted
   Worker.findById(id).populate({ path: 'surgeries', match: { is_deleted: false } })
     .then(data => {
       if (!data || data.is_deleted) {
@@ -58,8 +60,10 @@ const readOne = (req, res) => {
 }
 
 const readAllByUserId = (req, res) => {
+  // get the user id
   const userId = req.user._id
 
+  // get worker by user id that is not deleted populate surgeries that are not deleted
   Worker.find({ created_by: userId, is_deleted: false }).populate({ path: 'surgeries', match: { is_deleted: false } })
   .then(data => {
     if(!data || data.length === 0) {
@@ -85,18 +89,18 @@ const readAllByUserId = (req, res) => {
 }
 
 const createData = (req, res) => {
+  // add the user id to the request body
   const body = {
     ...req.body,
     created_by: req.user._id
   }
-  let workerId = ''
 
   Worker.create(body)
     .then(data => {
-      workerId = data._id
+      const workerId = data._id
 
       if(body.surgeries) {
-        addSurgerytoWorkers(workerId, body.surgeries)
+        addWorkersToSurgeries(workerId, body.surgeries)
       }
 
       return res.status(201).json({
@@ -117,6 +121,8 @@ const updateData = (req, res) => {
   const id = req.params.id
   const body = req.body
 
+  // find the worker by id and update using the request body
+  // make sure the data is not deleted
   Worker.findByIdAndUpdate(
     { _id: id, is_deleted: false },
     body,
@@ -125,13 +131,13 @@ const updateData = (req, res) => {
       runValidators: true
     }
   )
-    .then(data => {
-
+    .then(() => {
+      // if the body contains surgeries add them to the workers
       if(body.surgeries) {
-        addSurgerytoWorkers(id, body.surgeries)
+        addWorkersToSurgeries(id, body.surgeries)
       }
 
-      return res.status(201).json(data)
+      return res.status(201).json({message: `Updated worker id: ${id}`})
     })
     .catch(error => {
       if (error.name === 'CastError') {
@@ -151,6 +157,8 @@ const updateData = (req, res) => {
     })
 }
 
+
+// this is my soft delete i used to have a hard delete
 const deleteData = (req, res) => {
   const id = req.params.id
   const body = { is_deleted: true }
@@ -178,6 +186,8 @@ const deleteData = (req, res) => {
       return res.status(500).json(error)
     })
 }
+
+// below is my old hard delete code
 
 // const deleteData = (req, res) => {
 //   const id = req.params.id

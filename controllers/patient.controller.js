@@ -128,9 +128,9 @@ const updateData = (req, res) => {
     .then(async data => {
 
       // check that the patient they are trying to update is not deleted
-      if(data.is_deleted) {
+      if(!data || data.is_deleted) {
         return res.status(404).json({
-          message: `No hospitals found for user with id: ${userId}`
+          message: `No patients found with id: ${id}`
         })
       }
 

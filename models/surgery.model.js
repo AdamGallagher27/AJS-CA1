@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require('mongoose')
 
 const surgerySchema = new Schema({
   surgery_type: {
@@ -37,6 +37,18 @@ const surgerySchema = new Schema({
 		required: false,
 		default: false
 	}
-}, { timestamps: true });
+}, { timestamps: true })
 
-module.exports = model('Surgery', surgerySchema);
+// sanitization middleware
+surgerySchema.pre('save', function(next) {
+
+	const removeSpecialChars = (str) => {
+			return str.replace(/[<>\/\\&%$#@!^*()+=~`|{}[\]:"']/g, '') 
+	}
+
+	this.surgery_type = removeSpecialChars(this.surgery_type)
+
+	next()
+})
+
+module.exports = model('Surgery', surgerySchema)

@@ -7,14 +7,14 @@ const userLoggedIn = (req, res, next) => {
 	const authHeader = req.headers?.authorization?.split(' ')
 	if (req.headers?.authorization && authHeader[0] === 'Bearer') {
 		jwt.verify(authHeader[1], process.env.JWT_SECRET, (error, decoded) => {
-			if (error) req.user = undefined;
-			req.user = decoded;
+			if (error) req.user = undefined
+			req.user = decoded
 			return next()
 		})
 	}
 	else {
-		req.user = undefined;
-		next();
+		req.user = undefined
+		next()
 	}
 	return res.status(200)
 }

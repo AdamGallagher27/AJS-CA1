@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require('mongoose')
 
 const hospitalSchema = new Schema({
 	title: {
@@ -35,6 +35,20 @@ const hospitalSchema = new Schema({
 		required: false,
 		default: false
 	}
-}, { timestamps: true });
+}, { timestamps: true })
 
-module.exports = model('Hospital', hospitalSchema);
+// sanitization middleware
+hospitalSchema.pre('save', function(next) {
+
+	const removeSpecialChars = (str) => {
+			return str.replace(/[<>\/\\&%$#@!^*()+=~`|{}[\]:"']/g, '') 
+	}
+
+	this.title = removeSpecialChars(this.title)
+	this.city = removeSpecialChars(this.city)
+	this.created_by = removeSpecialChars(this.created_by)
+
+	next()
+})
+
+module.exports = model('Hospital', hospitalSchema)

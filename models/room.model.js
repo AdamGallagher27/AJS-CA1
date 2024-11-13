@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require('mongoose')
 
 const roomSchema = new Schema({
 	room_number: {
@@ -36,6 +36,18 @@ const roomSchema = new Schema({
 		required: false,
 		default: false
 	}
-}, { timestamps: true });
+}, { timestamps: true })
 
-module.exports = model('Room', roomSchema);
+// sanitization middleware
+roomSchema.pre('save', function(next) {
+
+	const removeSpecialChars = (str) => {
+			return str.replace(/[<>\/\\&%$#@!^*()+=~`|{}[\]:"']/g, '') 
+	}
+
+	this.room_type = removeSpecialChars(this.room_type)
+
+	next()
+})
+
+module.exports = model('Room', roomSchema)
