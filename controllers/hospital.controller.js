@@ -143,7 +143,6 @@ const createData = (req, res) => {
         return res.status(422).json(error)
       }
 
-      console.log(error)
       return res.status(500).json(error)
     })
 }
