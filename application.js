@@ -12,7 +12,6 @@ if (process.env.ENVIRONMENT === 'development') {
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-app.use(express.static(__dirname + '/views/'))
 
 // open routes
 app.use('/api/users', require('./routes/users'))

@@ -209,7 +209,7 @@ const deleteData = (req, res) => {
   const body = { is_deleted: true }
 
   Hospital.findByIdAndUpdate(id, body)
-    .then(async data => {
+    .then(data => {
       if (!data) {
         return res.status(404).json({
           message: `Hospital with id: ${id} not found`

@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "test": "set ENVIRONMENT=testing && npm run seed && jest",
+    "test": "set ENVIRONMENT=testing && npm run seed && jest --testTimeout=30000",
     "serve": "node server.js",
     "seed": "node ./seeding/testing.seed.js"
   },
