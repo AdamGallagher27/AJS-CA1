@@ -1,5 +1,6 @@
 require('dotenv').config()
 const express = require('express')
+const cors = require('cors')
 const app = express()
 const { userLoggedIn, checkUserPermission } = require('./middleware/auth.js')
 const { loginRequired, makeAdmin } = require('./controllers/user.controller.js')
@@ -10,6 +11,7 @@ if (process.env.ENVIRONMENT === 'development') {
   connect()
 }
 
+app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
