@@ -27,6 +27,10 @@ const login = (req, res) => {
 
       return res.status(200).json({
         message: 'Logged in succesfully',
+        full_name: user.full_name,
+        email: user.email,
+        user_id: user._id,
+        role: user.role,
         token: jwt.sign({
           email: user.email,
           full_name: user.full_name,

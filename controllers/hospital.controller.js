@@ -115,17 +115,15 @@ const readAllByUserId = (req, res) => {
 }
 
 const createData = (req, res) => {
-  // get the image file from req.files
-  const imageFile = req?.files[0]
   // get the new hospital body
   let body = {
     ...req.body,
     created_by: req.user._id
   }
 
-    // if image file is truthy assign the key (file name) to the body image path
-  if (imageFile) {
-    body.image_path = imageFile.key
+  // if image file is truthy assign the key (file name) to the body image path
+  if (req?.files) {
+    body.image_path = req.files[0].key
   }
 
   // create with the the request body
